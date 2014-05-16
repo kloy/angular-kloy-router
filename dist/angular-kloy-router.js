@@ -65,10 +65,13 @@ function LayoutManagerProvider () {
 module.exports = LayoutManagerProvider;
 
 },{"ng":"QBxXRv"}],"QBxXRv":[function(require,module,exports){
+/* global angular */
 module.exports = angular;
+
 },{}],"ng":[function(require,module,exports){
 module.exports=require('QBxXRv');
 },{}],4:[function(require,module,exports){
+/* jshint globalstrict:true */
 'use strict';
 
 var ng = require('ng');
@@ -227,7 +230,7 @@ function StateRouter (
 
     var allowedParams = (config[state].allowedParams || []).sort(),
         paramKeys = Object.keys(params || {}).sort(),
-        passes = true;;
+        passes = true;
 
     if (allowedParams.length !== paramKeys.length) {
       return false;

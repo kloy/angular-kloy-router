@@ -27,7 +27,7 @@ function StateRouter (
 
     var allowedParams = (config[state].allowedParams || []).sort(),
         paramKeys = Object.keys(params || {}).sort(),
-        passes = true;;
+        passes = true;
 
     if (allowedParams.length !== paramKeys.length) {
       return false;

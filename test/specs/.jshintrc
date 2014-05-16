@@ -1,0 +1,26 @@
+{
+    "browser": true,
+    "indent": 2,
+    "newcap": true,
+    "noarg": true,
+    "noempty": true,
+    "nonbsp": true,
+    "undef": true,
+    "unused": true,
+    "trailing": true,
+    "funcscope": true,
+    "sub": true,
+    "strict": false,
+    "globals": {
+      "describe": true,
+      "beforeEach": true,
+      "afterEach": true,
+      "it": true,
+      "expect": true,
+      "inject": true,
+      "injector": true,
+      "$apply": true,
+      "noop": true,
+      "module": true
+    }
+}

@@ -1,3 +1,4 @@
+/* jshint node:true */
 'use strict';
 
 module.exports = function (grunt) {
@@ -37,6 +38,12 @@ module.exports = function (grunt) {
         src: 'dist/angular-kloy-router.js',
         dest: 'dist/angular-kloy-router.min.js'
       }
+    },
+    jshint: {
+      options: {
+        jshintrc: true
+      },
+      plugin: ['src/*.js']
     }
   };
 
@@ -45,6 +52,7 @@ module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
 
   grunt.registerTask('default', [
+    'jshint:plugin',
     'browserify:plugin',
     'karma:continuous',
     'karma:unit',
@@ -52,6 +60,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('dist', [
+    'jshint:plugin',
     'browserify:plugin',
     'karma:continuous',
     'uglify:plugin'

@@ -219,7 +219,6 @@ describe('A StateRouter', function () {
     });
 
     var stateRouter = injector().get('stateRouter'),
-        $rootScope = injector().get('$rootScope'),
         stateModel = injector().get('stateModel');
 
     stateRouter.go('home');
@@ -404,8 +403,8 @@ describe('A StateRouter', function () {
         });
       });
 
-      var stateRouter = injector().get('stateRouter'),
-          scope = injector().get('$rootScope'),
+      injector().get('stateRouter');
+      var scope = injector().get('$rootScope'),
           stateModel = injector().get('stateModel');
 
       scope.$broadcast('stateChangeRequest', 'contacts', {id: 'abc'});
