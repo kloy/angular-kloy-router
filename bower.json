@@ -13,7 +13,7 @@
     "test",
     "src",
     "package.json",
-    "karma.conf.js",
+    "karma*.js",
     "Gruntfile.js"
   ],
   "dependencies": {

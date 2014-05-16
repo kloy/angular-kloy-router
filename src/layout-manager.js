@@ -47,18 +47,15 @@ function LayoutManagerProvider () {
     return this;
   };
 
-  this.$get = [
-    '$rootScope',
-    '$injector',
-    function ($rootScope, $injector) {
+  /*@ngInject*/
+  this.$get = function ($rootScope, $injector) {
 
-      return new LayoutManager(
-        sectionConfigs,
-        $rootScope,
-        $injector
-      );
-    }
-  ];
+    return new LayoutManager(
+      sectionConfigs,
+      $rootScope,
+      $injector
+    );
+  };
 }
 
 module.exports = LayoutManagerProvider;

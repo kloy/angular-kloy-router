@@ -182,22 +182,20 @@ function StateRouterProvider () {
     return this;
   };
 
-  this.$get = [
-    '$rootScope', 'stateModel', '$q', '$injector', 'KLOY_ROUTER_EVENTS',
-    function ($rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS) {
+  /*@ngInject*/
+  this.$get =function ($rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS) {
 
-      return new StateRouter(
-        this._config,
-        this._permissions,
-        this._paused,
-        $rootScope,
-        stateModel,
-        $q,
-        $injector,
-        KLOY_ROUTER_EVENTS
-      );
-    }
-  ];
+    return new StateRouter(
+      this._config,
+      this._permissions,
+      this._paused,
+      $rootScope,
+      stateModel,
+      $q,
+      $injector,
+      KLOY_ROUTER_EVENTS
+    );
+  };
 }
 
 module.exports = StateRouterProvider;

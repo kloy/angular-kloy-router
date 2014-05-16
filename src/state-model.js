@@ -1,5 +1,6 @@
 var ng = require('ng');
 
+/*@ngInject*/
 function StateModel () {
 
   var name = '',

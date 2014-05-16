@@ -11,16 +11,15 @@ module.exports = function (grunt) {
       },
       //continuous integration mode: run tests once in PhantomJS browser.
       continuous: {
-        configFile: 'karma.conf.js',
-        singleRun: true,
-        browsers: ['PhantomJS']
+        configFile: 'karma.continuous.conf.js'
       }
     },
     browserify: {
       options: {
         alias: [
           'src/ng.js:ng'
-        ]
+        ],
+        transform: ['browserify-ngannotate']
       },
       plugin: {
         src: 'src/router.js',
@@ -54,6 +53,7 @@ module.exports = function (grunt) {
   grunt.registerTask('default', [
     'jshint:plugin',
     'browserify:plugin',
+    'uglify:plugin',
     'karma:continuous',
     'karma:unit',
     'watch'
@@ -62,7 +62,7 @@ module.exports = function (grunt) {
   grunt.registerTask('dist', [
     'jshint:plugin',
     'browserify:plugin',
+    'uglify:plugin',
     'karma:continuous',
-    'uglify:plugin'
   ]);
 };

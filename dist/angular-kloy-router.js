@@ -48,18 +48,15 @@ function LayoutManagerProvider () {
     return this;
   };
 
-  this.$get = [
-    '$rootScope',
-    '$injector',
-    function ($rootScope, $injector) {
+  /*@ngInject*/
+  this.$get = ["$rootScope", "$injector", function ($rootScope, $injector) {
 
-      return new LayoutManager(
-        sectionConfigs,
-        $rootScope,
-        $injector
-      );
-    }
-  ];
+    return new LayoutManager(
+      sectionConfigs,
+      $rootScope,
+      $injector
+    );
+  }];
 }
 
 module.exports = LayoutManagerProvider;
@@ -87,41 +84,32 @@ ng.module('kloy.router', []).
   provider('stateRouter', require('./state-router')).
   provider('layoutManager', require('./layout-manager')).
   service('stateModel', require('./state-model')).
-  run([
-    'layoutManager',
-    '$rootScope',
-    'KLOY_ROUTER_EVENTS',
-    function (layoutManager, $rootScope, KLOY_ROUTER_EVENTS) {
+  run(/*@ngInject*/["layoutManager", "$rootScope", "KLOY_ROUTER_EVENTS", function (layoutManager, $rootScope, KLOY_ROUTER_EVENTS) {
 
-      $rootScope.section = function (section) {
+    $rootScope.section = function (section) {
 
-        return layoutManager.sections()[section] || null;
-      };
+      return layoutManager.sections()[section] || null;
+    };
 
-      $rootScope.$on(
-        KLOY_ROUTER_EVENTS.STATE_CHANGE_SUCCESS,
-        layoutManager.sync
-      );
-    }]
-  ).
-  run([
-    '$rootScope',
-    'stateRouter',
-    'KLOY_ROUTER_EVENTS',
-    function ($rootScope, stateRouter, KLOY_ROUTER_EVENTS) {
+    $rootScope.$on(
+      KLOY_ROUTER_EVENTS.STATE_CHANGE_SUCCESS,
+      layoutManager.sync
+    );
+  }]).
+  run(/*@ngInject*/["$rootScope", "stateRouter", "KLOY_ROUTER_EVENTS", function ($rootScope, stateRouter, KLOY_ROUTER_EVENTS) {
 
-      function listener (e, state, params) {
+    function listener (e, state, params) {
 
-        stateRouter.go(state, params);
-      }
-
-      $rootScope.$on(KLOY_ROUTER_EVENTS.STATE_CHANGE_REQUEST, listener);
+      stateRouter.go(state, params);
     }
-  ]);
+
+    $rootScope.$on(KLOY_ROUTER_EVENTS.STATE_CHANGE_REQUEST, listener);
+  }]);
 
 },{"./layout-manager":1,"./state-model":5,"./state-router":6,"ng":"QBxXRv"}],5:[function(require,module,exports){
 var ng = require('ng');
 
+/*@ngInject*/
 function StateModel () {
 
   var name = '',
@@ -385,22 +373,20 @@ function StateRouterProvider () {
     return this;
   };
 
-  this.$get = [
-    '$rootScope', 'stateModel', '$q', '$injector', 'KLOY_ROUTER_EVENTS',
-    function ($rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS) {
+  /*@ngInject*/
+  this.$get =["$rootScope", "stateModel", "$q", "$injector", "KLOY_ROUTER_EVENTS", function ($rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS) {
 
-      return new StateRouter(
-        this._config,
-        this._permissions,
-        this._paused,
-        $rootScope,
-        stateModel,
-        $q,
-        $injector,
-        KLOY_ROUTER_EVENTS
-      );
-    }
-  ];
+    return new StateRouter(
+      this._config,
+      this._permissions,
+      this._paused,
+      $rootScope,
+      stateModel,
+      $q,
+      $injector,
+      KLOY_ROUTER_EVENTS
+    );
+  }];
 }
 
 module.exports = StateRouterProvider;
