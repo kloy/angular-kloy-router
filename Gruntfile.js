@@ -23,19 +23,23 @@ module.exports = function (grunt) {
       },
       plugin: {
         src: 'src/router.js',
-        dest: 'dist/angular-kloy-router.js'
+        dest: 'build/angular-kloy-router.js'
       }
     },
     watch: {
+      build: {
+        files: ['src/*.js'],
+        tasks: ['browserify:plugin']
+      },
       test: {
-        files: ['src/*.js', 'test/**/*.js'],
-        tasks: ['browserify:plugin', 'karma:unit:run']
+        files: ['test/**/*.js', 'build/*.js'],
+        tasks: ['karma:unit:run']
       }
     },
     uglify: {
       plugin: {
-        src: 'dist/angular-kloy-router.js',
-        dest: 'dist/angular-kloy-router.min.js'
+        src: 'build/angular-kloy-router.js',
+        dest: 'build/angular-kloy-router.min.js'
       }
     },
     jshint: {
@@ -43,6 +47,21 @@ module.exports = function (grunt) {
         jshintrc: true
       },
       plugin: ['src/*.js']
+    },
+    clean: ['build'],
+    copy: {
+      plugin: {
+        files: [
+          {
+            src: 'build/angular-kloy-router.js',
+            dest: 'dist/angular-kloy-router.js'
+          },
+          {
+            src: 'build/angular-kloy-router.min.js',
+            dest: 'dist/angular-kloy-router.min.js'
+          }
+        ]
+      }
     }
   };
 
@@ -51,18 +70,21 @@ module.exports = function (grunt) {
   require('load-grunt-tasks')(grunt);
 
   grunt.registerTask('default', [
+    'clean',
     'jshint:plugin',
     'browserify:plugin',
     'uglify:plugin',
     'karma:continuous',
     'karma:unit',
-    'watch'
+    'watch',
   ]);
 
   grunt.registerTask('dist', [
+    'clean',
     'jshint:plugin',
     'browserify:plugin',
     'uglify:plugin',
     'karma:continuous',
+    'copy:plugin',
   ]);
 };
