@@ -47,8 +47,7 @@ function LayoutManagerProvider () {
     return this;
   };
 
-  /*@ngInject*/
-  this.$get = function ($rootScope, $injector) {
+  this.$get = /*@ngInject*/function ($rootScope, $injector) {
 
     return new LayoutManager(
       sectionConfigs,

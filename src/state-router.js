@@ -182,8 +182,9 @@ function StateRouterProvider () {
     return this;
   };
 
-  /*@ngInject*/
-  this.$get =function ($rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS) {
+  this.$get = /*@ngInject*/function (
+    $rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS
+  ) {
 
     return new StateRouter(
       this._config,

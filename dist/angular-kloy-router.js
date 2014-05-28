@@ -48,8 +48,7 @@ function LayoutManagerProvider () {
     return this;
   };
 
-  /*@ngInject*/
-  this.$get = ["$rootScope", "$injector", function ($rootScope, $injector) {
+  this.$get = /*@ngInject*/["$rootScope", "$injector", function ($rootScope, $injector) {
 
     return new LayoutManager(
       sectionConfigs,
@@ -373,8 +372,9 @@ function StateRouterProvider () {
     return this;
   };
 
-  /*@ngInject*/
-  this.$get =["$rootScope", "stateModel", "$q", "$injector", "KLOY_ROUTER_EVENTS", function ($rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS) {
+  this.$get = /*@ngInject*/["$rootScope", "stateModel", "$q", "$injector", "KLOY_ROUTER_EVENTS", function (
+    $rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS
+  ) {
 
     return new StateRouter(
       this._config,

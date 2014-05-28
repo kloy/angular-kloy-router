@@ -48,7 +48,7 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 	<ng-include src="section('main')"></ng-include>
 
 
-# Test Cases
+# First Draft Test Cases
 
 ### A StateRouter
 * <s>should go to states</s>
@@ -81,12 +81,64 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should allow syncing</s>
 * <s>should define template for match</s>
 * <s>should throw exception when registering duplicate sections</s>
-* <s>should sync when state changes</s>
+* <s>should sync when sync is called</s>
 
 ### A LocationRouter
-* should broadcast state change request when route matched
-* should broadcast error when unknown location change occurs
-* should match locations with params
-* should broadcast params with state change request
+* should match location to route on $locationChangeSuccess
+* should go to "unknown" route when path cannot be matched to route
+* should pass params to route config function
 * is able to be paused
 * is able to be synced
+* should treat all paths as lowercased
+
+# Current Draft Test Cases
+
+### A Router
+* should navigate to routes
+* should throw exception when navigating to unknown route
+* should throw exception when registering duplicate route
+* should allow modifying already defined route
+* should throw exception when attempting to modify undefined route
+* should prevent route changes when paused
+* should allow route changes when unpaused
+* should check all configured permissions
+* should throw exception when registering duplicate permissions
+* should prevent route change when permissions fail
+* should broadcast error when permissions fail
+* should navigate to route with params
+* should throw exception when unknown params passed
+* should prefetch before changing states
+* should broadcast error when prefetch fails
+* should prevent route change when prefetch fail
+* should attempt route transition when kloyRouteChangeRequest is heard
+* should match location's path to route on $locationChangeSuccess
+* should go to "unknown" route when path cannot be matched to route
+* should interpolate path variables with route params
+* should sync location's path with route
+* should treat all paths as lowercased
+
+### A Route
+* should contain current route's name
+* should contain current route's data
+* should contain current route's params
+* should allow checking if current route is passed value
+* should allow checking if current route is not passed value
+* should allow checking if current route includes passed value
+* should allow checking if current route does not include passed value
+* should allow checking if current route begins with passed value
+* should allow checking if current route ends with passed value
+
+### A Router Directive
+* should navigate to provided route when clicked
+* should modify href when provided route has configured path
+* should pass provided params
+* should modify href with interpolated path with params
+* should log error when provided route is unknown
+* should allow directive to be used on more than one element
+
+### A LayoutManager
+* <s>should allow syncing</s>
+* <s>should define template for match</s>
+* <s>should throw exception when registering duplicate sections</s>
+* <s>should sync when sync is called</s>
+* should expose section on $rootScope
