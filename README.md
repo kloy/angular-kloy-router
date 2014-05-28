@@ -117,11 +117,13 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * should sync location's path with route
 * should treat all paths as lowercased
 * should not change routes when navigating to current route
+* should get path for matched route
 
 ### A Route
 * should contain current route's name
 * should contain current route's data
 * should contain current route's params
+* should contain current route's permissions
 * should allow checking if current route is passed value
 * should allow checking if current route is not passed value
 * should allow checking if current route includes passed value

@@ -10,7 +10,7 @@ var router = function (
 
   def.go = function (routeName) {
 
-    var path, helpers = {}, configFns;
+    var helpers = {}, configFns;
 
     // helpers.path = function (_path) {
 
