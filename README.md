@@ -94,13 +94,13 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 # Current Draft Test Cases
 
 ### A Router
-* should navigate to routes
-* should throw exception when navigating to unknown route
-* should throw exception when registering duplicate route
-* should allow modifying already defined route
-* should throw exception when attempting to modify undefined route
-* should prevent route changes when paused
-* should allow route changes when unpaused
+* <s>should navigate to routes and broadcast success event</s>
+* <s>should throw exception when navigating to unknown route</s>
+* <s>should throw exception when registering duplicate route</s>
+* <s>should allow modifying already defined route</s>
+* <s>should throw exception when attempting to modify undefined route</s>
+* <s>should prevent route changes when paused</s>
+* <s>should allow route changes when unpaused</s>
 * should check all configured permissions
 * should throw exception when registering duplicate permissions
 * should prevent route change when permissions fail
@@ -116,6 +116,7 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * should interpolate path variables with route params
 * should sync location's path with route
 * should treat all paths as lowercased
+* should not change routes when navigating to current route
 
 ### A Route
 * should contain current route's name

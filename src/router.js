@@ -1,37 +1,95 @@
-/* jshint globalstrict:true */
-'use strict';
-
 var ng = require('ng');
 
-ng.module('kloy.router', []).
-  constant('KLOY_ROUTER_EVENTS', {
-    'STATE_CHANGE_SUCCESS': 'stateChangeSuccess',
-    'STATE_CHANGE_ERROR': 'stateChangeError',
-    'STATE_CHANGE_REQUEST': 'stateChangeRequest',
-    'STATE_ROUTER_PAUSED': 'stateRouterPaused',
-    'STATE_ROUTER_PLAYING': 'stateRouterPlaying'
-  }).
-  provider('stateRouter', require('./state-router')).
-  provider('layoutManager', require('./layout-manager')).
-  service('stateModel', require('./state-model')).
-  run(/*@ngInject*/function (layoutManager, $rootScope, KLOY_ROUTER_EVENTS) {
+var router = function (
+  routes, $injector, $location, $rootScope, KLOY_ROUTER_EVENTS
+) {
 
-    $rootScope.section = function (section) {
+  var def = {},
+      successEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS,
+      isPaused = false;
 
-      return layoutManager.sections()[section] || null;
-    };
+  def.go = function (routeName) {
 
-    $rootScope.$on(
-      KLOY_ROUTER_EVENTS.STATE_CHANGE_SUCCESS,
-      layoutManager.sync
-    );
-  }).
-  run(/*@ngInject*/function ($rootScope, stateRouter, KLOY_ROUTER_EVENTS) {
+    var path, helpers = {}, configFns;
 
-    function listener (e, state, params) {
+    // helpers.path = function (_path) {
 
-      stateRouter.go(state, params);
+    //    path = _path;
+    // };
+
+    configFns = routes[routeName];
+
+    if (! ng.isArray(configFns)) {
+      throw 'router.go() unknown route ' + routeName;
     }
 
-    $rootScope.$on(KLOY_ROUTER_EVENTS.STATE_CHANGE_REQUEST, listener);
-  });
+    configFns.forEach(function (configFn) {
+
+      $injector.invoke(configFn, helpers);
+    });
+
+    // if (ng.isString(path)) {
+    //   $location.path(path);
+    // }
+
+    if (! isPaused) {
+      $rootScope.$broadcast(successEvent, routeName);
+    }
+
+    return def;
+  };
+
+  def.pause = function () {
+
+    isPaused = true;
+
+    return def;
+  };
+
+  def.play = function () {
+
+    isPaused = false;
+
+    return def;
+  };
+
+  return def;
+};
+
+var routerProvider = function () {
+
+  var def = {}, routes = {};
+
+  def.route = function (name, configFn) {
+
+    if (name in routes) {
+      throw 'routerProvider.route() route already defined ' + name;
+    }
+
+    routes[name] = [configFn];
+
+    return def;
+  };
+
+  def.modifyRoute = function (name, configFn) {
+
+    if (!ng.isArray(routes[name])) {
+      throw 'routerProvider.modifyRoute() route undefined ' + name;
+    }
+
+    routes[name].push(configFn);
+
+    return def;
+  };
+
+  def.$get = /*@ngInject*/function (
+    $injector, $location, $rootScope, KLOY_ROUTER_EVENTS
+  ) {
+
+    return router(routes, $injector, $location, $rootScope, KLOY_ROUTER_EVENTS);
+  };
+
+  return def;
+};
+
+module.exports = routerProvider;

@@ -22,7 +22,7 @@ module.exports = function (grunt) {
         transform: ['browserify-ngannotate']
       },
       plugin: {
-        src: 'src/router.js',
+        src: 'src/plugin.js',
         dest: 'build/angular-kloy-router.js'
       }
     },
