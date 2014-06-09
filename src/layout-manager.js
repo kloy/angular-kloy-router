@@ -32,13 +32,13 @@ function LayoutManagerProvider () {
 
   var sectionConfigs = {};
 
-  this.section = function (section, templateSelector) {
+  this.addSection = function (section, templateSelector) {
 
     var errMsg;
 
     if (section in sectionConfigs) {
-      errMsg = "LayoutManagerProvider.section() duplicate state definition: ";
-      errMsg += section;
+      errMsg = "LayoutManagerProvider.addSection() duplicate section ";
+      errMsg += "definition: " + section;
       throw errMsg;
     }
 

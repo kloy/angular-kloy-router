@@ -33,13 +33,13 @@ function LayoutManagerProvider () {
 
   var sectionConfigs = {};
 
-  this.section = function (section, templateSelector) {
+  this.addSection = function (section, templateSelector) {
 
     var errMsg;
 
     if (section in sectionConfigs) {
-      errMsg = "LayoutManagerProvider.section() duplicate state definition: ";
-      errMsg += section;
+      errMsg = "LayoutManagerProvider.addSection() duplicate section ";
+      errMsg += "definition: " + section;
       throw errMsg;
     }
 
@@ -80,14 +80,21 @@ ng.module('kloy.router', []).
     'ROUTE_CHANGE_REQUEST': 'kloyRouteChangeRequest'
   }).
   provider('kloyRouter', require('./router')).
-  provider('layoutManager', require('./layout-manager')).
+  provider('kloyLayoutManager', require('./layout-manager')).
   factory('kloyRoute', require('./route')).
-  run(/*@ngInject*/["layoutManager", "$rootScope", function (layoutManager, $rootScope) {
+  run(/*@ngInject*/["kloyLayoutManager", "$rootScope", "KLOY_ROUTER_EVENTS", function (
+    kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
+  ) {
 
     $rootScope.section = function (section) {
 
-      return layoutManager.sections()[section] || null;
+      return kloyLayoutManager.sections()[section] || null;
     };
+
+    $rootScope.$on(KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS, function () {
+
+      kloyLayoutManager.sync();
+    });
   }]).
   run(/*@ngInject*/["$rootScope", "KLOY_ROUTER_EVENTS", "kloyRouter", function (
     $rootScope, KLOY_ROUTER_EVENTS, kloyRouter
@@ -202,7 +209,7 @@ var router = function (
       permissionFn = permissions[permissionName];
 
       if (! ng.isFunction(permissionFn)) {
-        throw "kloyRouter.checkPermissions(): unknown permission " +
+        throw "router.checkPermissions(): unknown permission " +
           permissionName;
       }
 
@@ -210,7 +217,7 @@ var router = function (
         promise = $injector.invoke(permissionFn);
       } catch (err) {
         $log.error(
-          'kloyRouter.checkPermissions(): problem invoking permission',
+          'router.checkPermissions(): problem invoking permission',
           err
         );
         throw err;
@@ -260,14 +267,14 @@ var router = function (
       return dfd.promise;
     }
     else if (! ng.isFunction(prefetchFn)) {
-      throw "kloyRouter.prefetch(): argument must be a function or undefined";
+      throw "router.prefetch(): argument must be a function or undefined";
     }
 
     try {
         prefetching = $injector.invoke(prefetchFn);
       } catch (err) {
       $log.error(
-        'kloyRouter.doPrefetch(): problem invoking prefetch',
+        'router.doPrefetch(): problem invoking prefetch',
         err
       );
       throw err;
@@ -288,7 +295,7 @@ var router = function (
     }
 
     if (isPaused) {
-      msg = 'kloyRouter.go(): paused, cannot go to ' + routeName;
+      msg = 'router.go(): paused, cannot go to ' + routeName;
       $log.debug(msg);
       return $q.reject(msg);
     }
@@ -346,7 +353,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('kloyRouter.go(): permissions error', err, routeName);
+          $log.debug('router.go(): permissions error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -370,7 +377,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('kloyRouter.go(): params error', err, routeName);
+          $log.debug('router.go(): params error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -391,7 +398,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('kloyRouter.go(): prefetch error', err, routeName);
+          $log.debug('router.go(): prefetch error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -471,7 +478,7 @@ var routerProvider = function () {
   def.addPermission = function (name, configFn) {
 
     if (name in permissions) {
-      throw "kloyRouterProvider.addPermission(): permission already defined";
+      throw "routerProvider.addPermission(): permission already defined";
     }
 
     permissions[name] = configFn;

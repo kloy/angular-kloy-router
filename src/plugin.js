@@ -11,14 +11,21 @@ ng.module('kloy.router', []).
     'ROUTE_CHANGE_REQUEST': 'kloyRouteChangeRequest'
   }).
   provider('kloyRouter', require('./router')).
-  provider('layoutManager', require('./layout-manager')).
+  provider('kloyLayoutManager', require('./layout-manager')).
   factory('kloyRoute', require('./route')).
-  run(/*@ngInject*/function (layoutManager, $rootScope) {
+  run(/*@ngInject*/function (
+    kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
+  ) {
 
     $rootScope.section = function (section) {
 
-      return layoutManager.sections()[section] || null;
+      return kloyLayoutManager.sections()[section] || null;
     };
+
+    $rootScope.$on(KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS, function () {
+
+      kloyLayoutManager.sync();
+    });
   }).
   run(/*@ngInject*/function (
     $rootScope, KLOY_ROUTER_EVENTS, kloyRouter

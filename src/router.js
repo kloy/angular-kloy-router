@@ -27,7 +27,7 @@ var router = function (
       permissionFn = permissions[permissionName];
 
       if (! ng.isFunction(permissionFn)) {
-        throw "kloyRouter.checkPermissions(): unknown permission " +
+        throw "router.checkPermissions(): unknown permission " +
           permissionName;
       }
 
@@ -35,7 +35,7 @@ var router = function (
         promise = $injector.invoke(permissionFn);
       } catch (err) {
         $log.error(
-          'kloyRouter.checkPermissions(): problem invoking permission',
+          'router.checkPermissions(): problem invoking permission',
           err
         );
         throw err;
@@ -85,14 +85,14 @@ var router = function (
       return dfd.promise;
     }
     else if (! ng.isFunction(prefetchFn)) {
-      throw "kloyRouter.prefetch(): argument must be a function or undefined";
+      throw "router.prefetch(): argument must be a function or undefined";
     }
 
     try {
         prefetching = $injector.invoke(prefetchFn);
       } catch (err) {
       $log.error(
-        'kloyRouter.doPrefetch(): problem invoking prefetch',
+        'router.doPrefetch(): problem invoking prefetch',
         err
       );
       throw err;
@@ -113,7 +113,7 @@ var router = function (
     }
 
     if (isPaused) {
-      msg = 'kloyRouter.go(): paused, cannot go to ' + routeName;
+      msg = 'router.go(): paused, cannot go to ' + routeName;
       $log.debug(msg);
       return $q.reject(msg);
     }
@@ -171,7 +171,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('kloyRouter.go(): permissions error', err, routeName);
+          $log.debug('router.go(): permissions error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -195,7 +195,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('kloyRouter.go(): params error', err, routeName);
+          $log.debug('router.go(): params error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -216,7 +216,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('kloyRouter.go(): prefetch error', err, routeName);
+          $log.debug('router.go(): prefetch error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -296,7 +296,7 @@ var routerProvider = function () {
   def.addPermission = function (name, configFn) {
 
     if (name in permissions) {
-      throw "kloyRouterProvider.addPermission(): permission already defined";
+      throw "routerProvider.addPermission(): permission already defined";
     }
 
     permissions[name] = configFn;

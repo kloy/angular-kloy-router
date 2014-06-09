@@ -1,4 +1,4 @@
-xdescribe('A LayoutManager', function () {
+describe('A LayoutManager', function () {
 
   beforeEach(function () {
 
@@ -7,16 +7,17 @@ xdescribe('A LayoutManager', function () {
 
   it('should allow syncing', function () {
 
-    module(function (layoutManagerProvider) {
+    module(function (kloyLayoutManagerProvider) {
 
-      layoutManagerProvider.section('master', function () {
+      kloyLayoutManagerProvider.addSection('master', function () {
 
         this.template('templates/home.html');
       });
     });
 
-    var layoutManager = injector().get('layoutManager'),
-        scope = injector().get('$rootScope');
+    var $i = injector(),
+        layoutManager = $i.get('kloyLayoutManager'),
+        scope = $i.get('$rootScope');
 
     layoutManager.sync();
     expect(scope.section('master')).toBe('templates/home.html');
@@ -24,25 +25,26 @@ xdescribe('A LayoutManager', function () {
 
   it('should define template for match', function () {
 
-    module(function (layoutManagerProvider) {
+    module(function (kloyLayoutManagerProvider) {
 
-      layoutManagerProvider.
-        section('master', function (stateModel) {
+      kloyLayoutManagerProvider.
+        addSection('master', function (kloyRoute) {
 
-          if (stateModel.is('home')) {
+          if (kloyRoute.is('home')) {
             this.template('templates/home.html');
           }
         });
     });
 
-    var layoutManager = injector().get('layoutManager'),
-        scope = injector().get('$rootScope'),
-        stateModel = injector().get('stateModel');
+    var $i = injector(),
+        layoutManager = $i.get('kloyLayoutManager'),
+        scope = $i.get('$rootScope'),
+        route = $i.get('kloyRoute');
 
-    stateModel.name('home');
+    route._update({name: 'home'});
     layoutManager.sync();
     expect(scope.section('master')).toBe('templates/home.html');
-    stateModel.name('unknown');
+    route._update({name: 'unknown'});
     layoutManager.sync();
     expect(scope.section('master')).toBeNull();
   });
@@ -50,33 +52,33 @@ xdescribe('A LayoutManager', function () {
   it('should throw exception when registering duplicate sections',
     function () {
 
-      module(function (layoutManagerProvider) {
+      module(function (kloyLayoutManagerProvider) {
 
-        layoutManagerProvider.
-          section('home', noop).
-          section('home', noop);
+        kloyLayoutManagerProvider.
+          addSection('home', noop).
+          addSection('home', noop);
       });
 
       expect(inject).toThrow();
     });
 
-  it('should sync when state changes', function () {
+  it('should sync when route changes', function () {
 
-    module(function (stateRouterProvider, layoutManagerProvider) {
+    module(function (kloyRouterProvider, kloyLayoutManagerProvider) {
 
-      stateRouterProvider.state('home');
-      layoutManagerProvider.section('master', function (stateModel) {
+      kloyRouterProvider.addRoute('home', function () {});
+      kloyLayoutManagerProvider.addSection('master', function (kloyRoute) {
 
-        if (stateModel.is('home')) {
+        if (kloyRoute.is('home')) {
           this.template('templates/home.html');
         }
       });
     });
 
-    var stateRouter = injector().get('stateRouter'),
+    var router = injector().get('kloyRouter'),
         scope = injector().get('$rootScope');
 
-    stateRouter.go('home');
+    router.go('home');
     $apply();
     expect(scope.section('master')).toBe('templates/home.html');
   });

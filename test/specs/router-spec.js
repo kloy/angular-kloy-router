@@ -42,17 +42,10 @@ describe('A Router', function () {
     module(function (kloyRouterProvider) {
 
       kloyRouterProvider.addRoute('home', function () {});
+      kloyRouterProvider.addRoute('home', function () {});
     });
 
-    function test () {
-      module(function (kloyRouterProvider) {
-
-        kloyRouterProvider.addRoute('home', function () {});
-      });
-      injector().get('kloyRouter');
-    }
-
-    expect(test).toThrow();
+    expect(inject).toThrow();
   });
 
   it('should prevent route changes when paused', function () {
@@ -149,19 +142,14 @@ describe('A Router', function () {
     'should throw exception when registering duplicate permissions',
     function () {
 
-      function test () {
+      module(function (kloyRouterProvider) {
 
-        module(function (kloyRouterProvider) {
+        kloyRouterProvider.
+          addPermission('same', function () {}).
+          addPermission('same', function () {});
+      });
 
-          kloyRouterProvider.
-            addPermission('same', function () {}).
-            addPermission('same', function () {});
-        });
-
-        injector().get('kloyRouter');
-      }
-
-      expect(test).toThrow();
+      expect(inject).toThrow();
     }
   );
 
@@ -375,13 +363,10 @@ describe('A Router', function () {
     'should throw exception when attempting to modify undefined route',
     function () {
 
-      function test () {
-        module(function (kloyRouterProvider) {
-          kloyRouterProvider.modifyRoute('home', function () {});
-        });
-        injector().get('kloyRouter');
-      }
+      module(function (kloyRouterProvider) {
+        kloyRouterProvider.modifyRoute('home', function () {});
+      });
 
-      expect(test).toThrow();
+      expect(inject).toThrow();
     });
 });

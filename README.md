@@ -160,8 +160,7 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should allow syncing</s>
 * <s>should define template for match</s>
 * <s>should throw exception when registering duplicate sections</s>
-* <s>should sync when sync is called</s>
-* should expose section on $rootScope
+* <s>should sync when route changes</s>
 
 
 # API for module
