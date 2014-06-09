@@ -62,6 +62,14 @@ module.exports = function (grunt) {
           }
         ]
       }
+    },
+    connect: {
+      server: {
+        options: {
+          port: 9000,
+          keepalive: true
+        }
+      }
     }
   };
 
@@ -74,7 +82,7 @@ module.exports = function (grunt) {
     'jshint:plugin',
     'browserify:plugin',
     'uglify:plugin',
-    'karma:continuous',
+    // 'karma:continuous',
     'karma:unit',
     'watch',
   ]);
@@ -86,5 +94,10 @@ module.exports = function (grunt) {
     'uglify:plugin',
     'karma:continuous',
     'copy:plugin',
+  ]);
+
+  grunt.registerTask('example', [
+    'dist',
+    'connect:server'
   ]);
 };

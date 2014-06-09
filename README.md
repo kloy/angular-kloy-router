@@ -4,44 +4,63 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 
 # Examples
 
-	// State requiring password permissions and with no params
-	app.config(function (stateRouterProvider) {
+	// Route requiring password permissions and with no params
+	app.config(function (kloyRouterProvider) {
 
-		stateRouterProvider.
-			permission('password', function ($q) {
+		kloyRouterProvider.
+			addPermission('password',
+				/* Angular Dependency Injection */
+				function ($q) {
 
-				var defer = $q.defer();
-				defer.resolve('authed');
+					var defer = $q.defer();
+					defer.resolve('authed');
 
-				return defer.promise;
-			}).
-			state('home', {
-				permissions: ['password'],
-				data: {
-					title: 'home'
+					return defer.promise;
 				}
+			).
+			addRoute('home', function () {
+
+				this.permissions(['password']);
+				this.data({
+					title: 'home',
+					back: true
+				});
+
+				this.supportsBack(true);
 			});
 	});
 
-	// State requiring params
-	app.config(function (stateRouterProvider) {
+	// Route requiring params
+	app.config(function (kloyRouterProvider) {
 
-		stateRouterProvider.
-			state('people', {
-				allowedParams: ['id']
+		kloyRouterProvider.
+			addRoute('people', function () {
+
+				this.requiredParams(['id']);
 			});
 	});
 
 	// Section visible when state is home
-	app.config(function (layoutManagerProvider) {
+	app.config(function (kloyLayoutManagerProvider) {
 
-		layoutManagerProvider.section('main', function (stateModel) {
+		kloyLayoutManagerProvider.addSection('main',
+			/* Angular Dependency Injection */function (kloyRoute) {
 
-			if (stateModel.is('home')) {
-				// set template url for section when state is home
-				this.template('templates/home.html');
-			}
-		});
+				if (kloyRoute.is('home')) {
+					// set template url for section when state is home
+					this.template('templates/home.html');
+				}
+			});
+	});
+
+	document.addEventListener('back', function () {
+
+		var result = $route.back();
+		if (result === false) {
+			application().quit();
+		} else {
+			router.go(result[name], result[params]);
+		}
 	});
 
 	<!-- How to use section in HTML -->
@@ -97,39 +116,37 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should navigate to routes and broadcast success event</s>
 * <s>should throw exception when navigating to unknown route</s>
 * <s>should throw exception when registering duplicate route</s>
-* <s>should allow modifying already defined route</s>
-* <s>should throw exception when attempting to modify undefined route</s>
 * <s>should prevent route changes when paused</s>
 * <s>should allow route changes when unpaused</s>
-* should check all configured permissions
-* should throw exception when registering duplicate permissions
-* should prevent route change when permissions fail
-* should broadcast error when permissions fail
-* should navigate to route with params
-* should throw exception when unknown params passed
-* should prefetch before changing states
-* should broadcast error when prefetch fails
-* should prevent route change when prefetch fail
-* should attempt route transition when kloyRouteChangeRequest is heard
+* <s>should check all configured permissions before transitioning to route</s>
+* <s>should throw exception when registering duplicate permissions</s>
+* <s>should prevent route change and broadcast error when permissions fail</s>
+* <s>should navigate to route with params</s>
+* <s>should enforce required params</s>
+* <s>should prefetch before changing states</s>
+* <s>should prevent route change and broadcast error when prefetch fails</s>
+* <s>should broadcast start event when navigating to route</s>
+* <s>should attempt route transition when kloyRouteChangeRequest is heard</s>
+* <s>should allow modifying already defined route</s>
+* <s>should throw exception when attempting to modify undefined route</s>
 * should match location's path to route on $locationChangeSuccess
-* should go to "unknown" route when path cannot be matched to route
+* should broadcast error when path cannot be matched to route
 * should interpolate path variables with route params
 * should sync location's path with route
 * should treat all paths as lowercased
-* should not change routes when navigating to current route
 * should get path for matched route
+* (is this needed?) should not change routes when navigating to current route
 
 ### A Route
-* should contain current route's name
-* should contain current route's data
-* should contain current route's params
-* should contain current route's permissions
-* should allow checking if current route is passed value
-* should allow checking if current route is not passed value
-* should allow checking if current route includes passed value
-* should allow checking if current route does not include passed value
-* should allow checking if current route begins with passed value
-* should allow checking if current route ends with passed value
+* <s>should contain current route's name</s>
+* <s>should contain current route's data</s>
+* <s>should contain current route's params</s>
+* <s>should allow checking if current route is passed value</s>
+* <s>should allow checking if current route is not passed value</s>
+* <s>should allow checking if current route includes passed value</s>
+* <s>should allow checking if current route does not include passed value</s>
+* <s>should allow checking if current route starts with passed value</s>
+* <s>should allow checking if current route ends with passed value</s>
 
 ### A Router Directive
 * should navigate to provided route when clicked
@@ -145,3 +162,37 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should throw exception when registering duplicate sections</s>
 * <s>should sync when sync is called</s>
 * should expose section on $rootScope
+
+
+# API for module
+* kloyRouter
+	* addRoute(routeName, routeConfigFn)
+	* modifyRoute(routeName, routeConfigFn)
+	* addPermission(permissionName, permissionConfigFn)
+		* routeConfigFn
+			* permissions(array)
+			* requiredParams(array)
+			* path(string)
+			* prefetch(function returning promise)
+		* permissionConfigFn -> returns promise
+	* EVENTS
+		* kloyRouteChangeStart (e, routeName, kloyRoute)
+		* kloyRouteChangeSuccess (e, routeName, kloyRoute)
+		* kloyRouteChangeError (e, err, routeName, kloyRoute)
+* kloyRoute
+	* name()
+	* data()
+	* params()
+	* is()
+	* not()
+	* includes()
+	* excludes()
+	* startsWith()
+	* endsWith()
+	* &history() contains all previous routes
+	* &previous() contains last route
+* kloyLayoutManager
+	* addSection(sectionName, sectionConfigFn)
+		* sectionConfigFn
+			* template(string)
+& previous to property/method indicates tentative support

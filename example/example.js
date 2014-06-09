@@ -1,56 +1,57 @@
-ng.module('app').config(function (kloyRouterProvider) {
+angular.module('example', []).
+  config(/*@ngInject*/function (kloyRouterProvider) {
 
-  kloyRouterProvider.
+    kloyRouterProvider.
 
-    permission('password', /*@ngInject*/function ($q) {
+      addPermission('password', /*@ngInject*/function ($q) {
 
-      var dfd = $q.defer();
+        var dfd = $q.defer();
+        dfd.resolve('authed');
 
-      dfd.resolve('authed');
+        return dfd.promise;
+      }).
 
-      return dfd.promise;
-    }).
+      addRoute('home', /*@ngInject*/function () {
 
-    route('home', /*@ngInject*/function () {
+        this.
+          permissions(['password']).
+          params(['foo', 'bar']).
+          data({name: 'awesome'}).
+          path('/my/path');
+      }).
 
-      this.
-        permissions(['password']).
-        params(['foo', 'bar']).
-        data({name: 'awesome'}).
-        path('/my/path');
-    }).
+      addRoute('profile', /*@ngInject*/function () {
 
-    route('profile', /*@ngInject*/function () {
+        this.
+          permissions(['password']).
+          path('/about');
+      });
+  }).
+  config(/*@ngInject*/function (kloyLayoutManagerProvider) {
 
-      this.
-        permissions(['password']).
-        path('/about');
-    }).
+    kloyLayoutManagerProvider.
+      addSection('main', /*@ngInject*/function (kloyRoute) {
 
-    modifyRoute('profile', /*@ngInject*/function () {
+        var templates = {
+          home: 'templates/home.html',
+          profile: 'templates/profile.html'
+        };
 
-      this.path('/about-me');
-    });
+        this.template(templates[kloyRoute.name()]);
+      }).
 
-});
+      addSection('sidebar', /*@ngInject*/function () {
 
-ng.module('app').config(function (kloyLayoutManagerProvider) {
+        this.template('templates/sidebar.html');
+      });
+  }).
+  run(/*@ngInject*/function ($log) {
 
-  kloyLayoutManagerProvider.
+    $log.debug('Example running');
+  });
 
-    section('main', /*@ngInject*/function (kloyRoute) {
-
-      var templates = {
-        home: 'templates/home.html',
-        profile: 'templates/profile.html'
-      };
-
-      this.template(templates[kloyRoute.name()]);
-    }).
-
-    section('sidebar', /*@ngInject*/function () {
-
-      this.template('templates/sidebar.html');
-    });
-
-});
+try {
+  angular.bootstrap(document, ['example']);
+} catch (e) {
+  console.error(e.message, e);
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Kloy Router Example</title>
+	<script type="text/javascript" src="/bower_components/angular/angular.js"></script>
+	<script type="text/javascript" src="/dist/angular-kloy-router.js"></script>
+	<script type="text/javascript" src="example.js"></script>
+</head>
+<body>
+	<h1>Kloy Router Example</h1>
+	<ul>
+		<li><a kloy-rref="home">Home</a></li>
+		<li><a kloy-rref="profile">Profile</a></li>
+	</ul>
+
+	<ng-include src="section('main')"></ng-include>
+	<ng-include src="section('sidebar')"></ng-include>
+</body>
+</html>

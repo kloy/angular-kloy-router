@@ -74,321 +74,431 @@ var ng = require('ng');
 
 ng.module('kloy.router', []).
   constant('KLOY_ROUTER_EVENTS', {
-    'STATE_CHANGE_SUCCESS': 'stateChangeSuccess',
-    'STATE_CHANGE_ERROR': 'stateChangeError',
-    'STATE_CHANGE_REQUEST': 'stateChangeRequest',
-    'STATE_ROUTER_PAUSED': 'stateRouterPaused',
-    'STATE_ROUTER_PLAYING': 'stateRouterPlaying'
+    'ROUTE_CHANGE_START': 'kloyRouteChangeStart',
+    'ROUTE_CHANGE_SUCCESS': 'kloyRouteChangeSuccess',
+    'ROUTE_CHANGE_ERROR': 'kloyRouteChangeError',
+    'ROUTE_CHANGE_REQUEST': 'kloyRouteChangeRequest'
   }).
-  provider('stateRouter', require('./state-router')).
+  provider('kloyRouter', require('./router')).
   provider('layoutManager', require('./layout-manager')).
-  service('stateModel', require('./state-model')).
-  run(/*@ngInject*/["layoutManager", "$rootScope", "KLOY_ROUTER_EVENTS", function (layoutManager, $rootScope, KLOY_ROUTER_EVENTS) {
+  factory('kloyRoute', require('./route')).
+  run(/*@ngInject*/["layoutManager", "$rootScope", function (layoutManager, $rootScope) {
 
     $rootScope.section = function (section) {
 
       return layoutManager.sections()[section] || null;
     };
+  }]).
+  run(/*@ngInject*/["$rootScope", "KLOY_ROUTER_EVENTS", "kloyRouter", function (
+    $rootScope, KLOY_ROUTER_EVENTS, kloyRouter
+  ) {
 
     $rootScope.$on(
-      KLOY_ROUTER_EVENTS.STATE_CHANGE_SUCCESS,
-      layoutManager.sync
+      KLOY_ROUTER_EVENTS.ROUTE_CHANGE_REQUEST,
+      function routeListener (e, routeName, params) {
+
+        kloyRouter.go(routeName, params);
+      }
     );
-  }]).
-  run(/*@ngInject*/["$rootScope", "stateRouter", "KLOY_ROUTER_EVENTS", function ($rootScope, stateRouter, KLOY_ROUTER_EVENTS) {
-
-    function listener (e, state, params) {
-
-      stateRouter.go(state, params);
-    }
-
-    $rootScope.$on(KLOY_ROUTER_EVENTS.STATE_CHANGE_REQUEST, listener);
   }]);
 
-},{"./layout-manager":1,"./state-model":5,"./state-router":6,"ng":"QBxXRv"}],5:[function(require,module,exports){
+},{"./layout-manager":1,"./route":5,"./router":6,"ng":"QBxXRv"}],5:[function(require,module,exports){
 var ng = require('ng');
 
-/*@ngInject*/
-function StateModel () {
+var route = /*@ngInject*/function () {
 
-  var name = '',
-      data = {},
-      permissions = [],
-      params = {};
+  var def = {}, params, name, routeData;
 
-  this.name = function (_name) {
+  /*
+    Internal method should only be used by kloyRouter to update current
+    route information.
+  */
+  def._update = function (obj) {
 
-    if (ng.isDefined(_name)) {
-      name = _name;
-    }
+    params = obj.params || undefined;
+    name = obj.name || undefined;
+    routeData = obj.data || undefined;
+  };
+
+  def.params = function () {
+
+    return params;
+  };
+
+  def.name = function () {
 
     return name;
   };
 
-  this.data = function (_data) {
+  def.data = function () {
 
-    if (ng.isObject(_data)) {
-      data = ng.copy(_data);
-    }
-
-    return ng.copy(data);
+    return ng.copy(routeData);
   };
 
-  this.permissions = function (_permissions) {
+  def.is = function (val) {
 
-    if (ng.isArray(_permissions)) {
-      permissions = _permissions;
-    }
-
-    return permissions;
+    return (def.name() === val);
   };
 
-  this.params = function (_params) {
+  def.not = function (val) {
 
-    if (ng.isObject(_params)) {
-      params = ng.copy(_params);
-    }
-
-    return ng.copy(params);
+    return (! def.is(val));
   };
 
-  this.is = function (val) {
+  def.includes = function (val) {
 
-    return (this.name() === val);
+    return (def.name().indexOf(val) !== -1);
   };
 
-  this.not = function (val) {
+  def.excludes = function (val) {
 
-    return (! this.is(val));
+    return (! def.includes(val));
   };
 
-  this.includes = function (val) {
+  def.startsWith = function (val) {
 
-    return (this.name().indexOf(val) !== -1);
+    return (def.name().substring(0, val.length) === val);
   };
 
-  this.excludes = function (val) {
+  def.endsWith = function (val) {
 
-    return (! this.includes(val));
-  };
-
-  this.startsWith = function (val) {
-
-    return (this.name().substring(0, val.length) === val);
-  };
-
-  this.endsWith = function (val) {
-
-    var name = this.name();
+    var name = def.name();
 
     return (name.substring(name.length - val.length) === val);
   };
-}
 
-module.exports = StateModel;
+  return def;
+};
+
+module.exports = route;
 
 },{"ng":"QBxXRv"}],6:[function(require,module,exports){
 var ng = require('ng');
 
-function StateRouter (
-  config, registeredPermissions, paused, $rootScope, stateModel, $q, $injector,
-  KLOY_ROUTER_EVENTS
+var router = function (
+  routes, permissions, $injector, $location, $rootScope, KLOY_ROUTER_EVENTS,
+  $log, $q, kloyRoute
 ) {
 
-  var checkPermissions, checkParams;
+  var def = {}, checkPermissions, checkParams, doPrefetch,
+      startEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_START,
+      successEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS,
+      errorEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_ERROR,
+      isPaused = false;
 
-  // Check that all permissions are resolved.
-  checkPermissions = function (permissions) {
+  checkPermissions = function (permissionNames) {
 
-    var promises = [];
+    var stubPermission, allPermissions = [];
+    permissionNames = permissionNames || [];
 
-    permissions.forEach(function (permission) {
+    stubPermission = $q.defer();
+    stubPermission.resolve();
+    allPermissions.push(stubPermission.promise);
 
-      var permissionFn = registeredPermissions[permission];
-      var promise = $injector.invoke(permissionFn);
+    permissionNames.forEach(function (permissionName) {
 
-      promises.push(promise);
-    });
+      var permissionFn, promise;
 
-    return $q.all(promises);
-  };
+      permissionFn = permissions[permissionName];
 
-  checkParams = function (state, params) {
-
-    var allowedParams = (config[state].allowedParams || []).sort(),
-        paramKeys = Object.keys(params || {}).sort(),
-        passes = true;
-
-    if (allowedParams.length !== paramKeys.length) {
-      return false;
-    }
-
-    allowedParams.every(function (param) {
-
-      if (allowedParams.indexOf(param) !== -1) {
-        return true;
+      if (! ng.isFunction(permissionFn)) {
+        throw "kloyRouter.checkPermissions(): unknown permission " +
+          permissionName;
       }
 
-      passes = false;
-      return false;
+      try {
+        promise = $injector.invoke(permissionFn);
+      } catch (err) {
+        $log.error(
+          'kloyRouter.checkPermissions(): problem invoking permission',
+          err
+        );
+        throw err;
+      }
+
+      allPermissions.push(promise);
     });
 
-    return passes;
+    return $q.all(allPermissions);
   };
 
-  this.isPaused = function () {
+  checkParams = function (params, requiredParams) {
 
-    return paused;
+    var dfd = $q.defer(),
+        missingParams = [];
+
+    params = params || {};
+
+    if (! ng.isArray(requiredParams)) {
+      dfd.resolve();
+      return dfd.promise;
+    }
+
+    requiredParams.forEach(function (name) {
+
+      if (name in params) { return; }
+
+      missingParams.push(name);
+    });
+
+    if (missingParams.length) {
+
+      return $q.reject('missing required param(s) ' + missingParams.join(', '));
+    }
+
+    dfd.resolve();
+    return dfd.promise;
   };
 
-  this.pause = function () {
+  doPrefetch = function (prefetchFn) {
 
-    paused = true;
-    $rootScope.$broadcast(KLOY_ROUTER_EVENTS.STATE_ROUTER_PAUSED, stateModel);
+    var prefetching, dfd;
 
-    return this;
-  };
+    if (ng.isUndefined(prefetchFn)) {
+      dfd = $q.defer();
+      dfd.resolve();
+      return dfd.promise;
+    }
+    else if (! ng.isFunction(prefetchFn)) {
+      throw "kloyRouter.prefetch(): argument must be a function or undefined";
+    }
 
-  this.play = function () {
-
-    paused = false;
-    $rootScope.$broadcast(
-      KLOY_ROUTER_EVENTS.STATE_ROUTER_PLAYING,
-      stateModel
-    );
-
-    return this;
-  };
-
-  // Go to a state
-  this.go = function (state, params) {
-
-    var permissions, changeState, failState, defer, promise, prefetchFn;
-
-    changeState = function () {
-
-      stateModel.name(state);
-      stateModel.params(params || {});
-      stateModel.data(config[state].data || {});
-      stateModel.permissions(config[state].permissions || []);
-      $rootScope.$broadcast(
-        KLOY_ROUTER_EVENTS.STATE_CHANGE_SUCCESS,
-        stateModel
+    try {
+        prefetching = $injector.invoke(prefetchFn);
+      } catch (err) {
+      $log.error(
+        'kloyRouter.doPrefetch(): problem invoking prefetch',
+        err
       );
+      throw err;
+    }
+
+    return prefetching;
+  };
+
+  def.go = function (routeName, params) {
+
+    var helpers, configFns, permissions, promise, msg, requiredParams,
+        prefetchFn, previousErr, routeData;
+
+    configFns = routes[routeName];
+
+    if (! ng.isArray(configFns)) {
+      throw 'router.go() unknown route ' + routeName;
+    }
+
+    if (isPaused) {
+      msg = 'kloyRouter.go(): paused, cannot go to ' + routeName;
+      $log.debug(msg);
+      return $q.reject(msg);
+    }
+
+    $rootScope.$broadcast(startEvent, routeName, kloyRoute);
+
+    helpers = {
+      permissions: function (listOfPermissions) {
+
+        if (ng.isDefined(listOfPermissions)) {
+          permissions = listOfPermissions;
+        }
+
+        return permissions;
+      },
+      requireParams: function (params) {
+
+        if (ng.isDefined(params)) {
+          requiredParams = params;
+        }
+
+        return requiredParams;
+      },
+      prefetch: function (fn) {
+
+        if (ng.isDefined(fn)) {
+          prefetchFn = fn;
+        }
+
+        return prefetchFn;
+      },
+      data: function (obj) {
+
+        if (ng.isDefined(obj)) {
+          routeData = ng.copy(obj);
+        }
+
+        return routeData;
+      }
     };
 
-    failState = function (err) {
+    configFns.forEach(function (configFn) {
 
-      $rootScope.$broadcast(
-        KLOY_ROUTER_EVENTS.STATE_CHANGE_ERROR,
-        err,
-        stateModel
+      configFn.bind(helpers)();
+    });
+
+    previousErr = false;
+    promise = checkPermissions(permissions).
+      then(
+        function () {
+
+          return checkParams(params, requiredParams);
+        },
+        function (err) {
+
+          if (previousErr) { return $q.reject(err); }
+
+          $log.debug('kloyRouter.go(): permissions error', err, routeName);
+          $rootScope.$broadcast(
+            errorEvent,
+            {
+              message: err,
+              type: 'permissions'
+            },
+            routeName,
+            kloyRoute
+          );
+          previousErr = true;
+
+          return $q.reject(err);
+        }
+      ).
+      then(
+        function () {
+
+          return doPrefetch(prefetchFn);
+        },
+        function (err) {
+
+          if (previousErr) { return $q.reject(err); }
+
+          $log.debug('kloyRouter.go(): params error', err, routeName);
+          $rootScope.$broadcast(
+            errorEvent,
+            {
+              message: err,
+              type: 'params'
+            },
+            routeName,
+            kloyRoute
+          );
+          previousErr = true;
+
+          return $q.reject(err);
+        }
+      ).
+      then(
+        null,
+        function (err) {
+
+          if (previousErr) { return $q.reject(err); }
+
+          $log.debug('kloyRouter.go(): prefetch error', err, routeName);
+          $rootScope.$broadcast(
+            errorEvent,
+            {
+              message: err,
+              type: 'prefetch'
+            },
+            routeName,
+            kloyRoute
+          );
+          previousErr = true;
+
+          return $q.reject(err);
+        }
+      ).
+      then(
+        function (data) {
+
+          kloyRoute._update({
+            params: params,
+            name: routeName,
+            data: routeData
+          });
+
+          // All went well, broadcast success event
+          $rootScope.$broadcast(successEvent, routeName, kloyRoute);
+
+          return data;
+        }
       );
-    };
 
-    // Prevent changing state when paused.
-    if (this.isPaused()) {
-      return;
-    }
-
-    if (ng.isUndefined(config[state])) {
-      throw "StateRouter.go() unknown state: " + state;
-    }
-
-    if (! checkParams(state, params)) {
-      throw "StateRouter.go() malformatted params for state: " + state;
-    }
-
-    defer = $q.defer();
-    defer.resolve();
-    promise = defer.promise;
-
-    permissions = config[state].permissions;
-
-    if (ng.isDefined(permissions)) {
-      promise = promise.then(function () {
-
-        return checkPermissions(permissions);
-      });
-    }
-
-    prefetchFn = config[state].prefetch;
-    if (ng.isFunction(prefetchFn)) {
-      promise = promise.then(function () {
-
-        return $injector.invoke(prefetchFn);
-      });
-    }
-
-    promise.then(changeState, failState);
-
-    return this;
-  };
-}
-
-function StateRouterProvider () {
-
-  this._config = {};
-  this._permissions = {};
-  this._paused = false;
-
-  this.pause = function () {
-
-    this._paused = true;
-
-    return this;
+    return promise;
   };
 
-  this.play = function () {
+  def.pause = function () {
 
-    this._paused = false;
+    isPaused = true;
 
-    return this;
+    return def;
   };
 
-  this.state = function (state, config) {
+  def.play = function () {
 
-    if (state in this._config) {
-      throw "StateRouterProvider.state() duplicate state definition: " + state;
+    isPaused = false;
+
+    return def;
+  };
+
+  return def;
+};
+
+var routerProvider = function () {
+
+  var def = {}, routes = {}, permissions = {};
+
+  def.addRoute = function (name, configFn) {
+
+    if (name in routes) {
+      throw 'routerProvider.addRoute() route already defined ' + name;
     }
 
-    this._config[state] = config || {};
+    routes[name] = [configFn];
 
-    return this;
+    return def;
   };
 
-  this.permission = function (permission, fn) {
+  def.modifyRoute = function (name, configFn) {
 
-    var errMsg;
-
-    if (permission in this._permissions) {
-      errMsg = "StateRouterProvider.permission() duplicate permission ";
-      errMsg += "definition: " + permission;
-      throw errMsg;
+    if (ng.isUndefined(routes[name])) {
+      throw 'routerProvider.modifyRoute() route not defined ' + name;
     }
 
-    this._permissions[permission] = fn;
+    routes[name].push(configFn);
 
-    return this;
+    return def;
   };
 
-  this.$get = /*@ngInject*/["$rootScope", "stateModel", "$q", "$injector", "KLOY_ROUTER_EVENTS", function (
-    $rootScope, stateModel, $q, $injector, KLOY_ROUTER_EVENTS
+  def.addPermission = function (name, configFn) {
+
+    if (name in permissions) {
+      throw "kloyRouterProvider.addPermission(): permission already defined";
+    }
+
+    permissions[name] = configFn;
+
+    return def;
+  };
+
+  def.$get = /*@ngInject*/["$injector", "$location", "$rootScope", "KLOY_ROUTER_EVENTS", "$log", "$q", "kloyRoute", function (
+    $injector, $location, $rootScope, KLOY_ROUTER_EVENTS, $log, $q, kloyRoute
   ) {
 
-    return new StateRouter(
-      this._config,
-      this._permissions,
-      this._paused,
-      $rootScope,
-      stateModel,
-      $q,
+    return router(
+      routes,
+      permissions,
       $injector,
-      KLOY_ROUTER_EVENTS
+      $location,
+      $rootScope,
+      KLOY_ROUTER_EVENTS,
+      $log,
+      $q,
+      kloyRoute
     );
   }];
-}
 
-module.exports = StateRouterProvider;
+  return def;
+};
+
+module.exports = routerProvider;
 
 },{"ng":"QBxXRv"}]},{},[4])
