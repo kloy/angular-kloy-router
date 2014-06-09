@@ -53,62 +53,8 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 			});
 	});
 
-	document.addEventListener('back', function () {
-
-		var result = $route.back();
-		if (result === false) {
-			application().quit();
-		} else {
-			router.go(result[name], result[params]);
-		}
-	});
-
 	<!-- How to use section in HTML -->
 	<ng-include src="section('main')"></ng-include>
-
-
-# First Draft Test Cases
-
-### A StateRouter
-* <s>should go to states</s>
-* <s>should pass state name when state changes</s>
-* <s>should throw exception for unknown states</s>
-* <s>should throw exception when registering duplicate states</s>
-* <s>should prevent state changes when paused</s>
-* <s>should resume state changes when unpaused</s>
-* <s>should check permissions</s>
-* <s>should throw exception when registering duplicate permissions</s>
-* <s>should broadcast error when permissions fail</s>
-* <s>should prevent state change when permissions fail</s>
-* <s>should pass config data when state changes</s>
-* <s>should pass params when state changes</s>
-* <s>should throw exception when params do not match configured params</s>
-* <s>should prefetch before changing states</s>
-* <s>should broadcast error when prefetch fails</s>
-* <s>should prevent state change when prefetch fail</s>
-* <s>should attempt state transition when stateChangeRequest is heard</s>
-
-### A StateModel
-* <s>checks if current state is passed value</s>
-* <s>checks if current state is not passed value</s>
-* <s>checks if current state includes passed value</s>
-* <s>checks if current state does not include passed value</s>
-* <s>checks if current state begins with passsed value</s>
-* <s>checks if current state ends with passsed value</s>
-
-### A LayoutManager
-* <s>should allow syncing</s>
-* <s>should define template for match</s>
-* <s>should throw exception when registering duplicate sections</s>
-* <s>should sync when sync is called</s>
-
-### A LocationRouter
-* should match location to route on $locationChangeSuccess
-* should go to "unknown" route when path cannot be matched to route
-* should pass params to route config function
-* is able to be paused
-* is able to be synced
-* should treat all paths as lowercased
 
 # Current Draft Test Cases
 
