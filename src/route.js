@@ -2,7 +2,7 @@ var ng = require('ng');
 
 var route = /*@ngInject*/function () {
 
-  var def = {}, params, name, routeData;
+  var def = {}, params, name, routeData, path;
 
   /*
     Internal method should only be used by kloyRouter to update current
@@ -13,6 +13,7 @@ var route = /*@ngInject*/function () {
     params = obj.params || undefined;
     name = obj.name || undefined;
     routeData = obj.data || undefined;
+    path = obj.path || undefined;
   };
 
   def.params = function () {
@@ -28,6 +29,11 @@ var route = /*@ngInject*/function () {
   def.data = function () {
 
     return ng.copy(routeData);
+  };
+
+  def.path = function () {
+
+    return path;
   };
 
   def.is = function (val) {

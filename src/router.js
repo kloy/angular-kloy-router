@@ -5,11 +5,87 @@ var router = function (
   $log, $q, kloyRoute
 ) {
 
-  var def = {}, checkPermissions, checkParams, doPrefetch,
+  var checkPermissions, checkParams, doPrefetch, buildRouterConfig, updatePath,
+      buildPathsConfig, hasPath, convertToPathTemplate, pathParams,
+      def = {},
+      routerConfig = {},
+      pathsConfig = {},
       startEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_START,
       successEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS,
       errorEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_ERROR,
       isPaused = false;
+
+  buildRouterConfig = function () {
+
+    ng.forEach(routes, function (configFns, routeName) {
+
+      var config, helpers;
+
+      config = routerConfig[routeName] || {};
+
+      helpers = {
+        permissions: function (listOfPermissions) {
+
+          if (ng.isDefined(listOfPermissions)) {
+            config.permissions = listOfPermissions;
+          }
+
+          return config.permissions;
+        },
+        requireParams: function (params) {
+
+          if (ng.isDefined(params)) {
+            config.requiredParams = params;
+          }
+
+          return config.requiredParams;
+        },
+        prefetch: function (fn) {
+
+          if (ng.isDefined(fn)) {
+            config.prefetchFn = fn;
+          }
+
+          return config.prefetchFn;
+        },
+        data: function (obj) {
+
+          if (ng.isDefined(obj)) {
+            config.data = ng.copy(obj);
+          }
+
+          return config.data;
+        },
+        path: function (path) {
+
+          if (ng.isDefined(path)) {
+            config.path = path;
+          }
+
+          return config.path;
+        }
+      };
+
+      configFns.forEach(function (configFn) {
+
+        configFn.bind(helpers)();
+      });
+
+      routerConfig[routeName] = config;
+    });
+  };
+
+  buildPathsConfig = function () {
+
+    ng.forEach(routerConfig, function (routeConfig, routeName) {
+
+      var path = routeConfig.path;
+
+      if (ng.isDefined(path)) {
+        pathsConfig[path] = routeName;
+      }
+    });
+  };
 
   checkPermissions = function (permissionNames) {
 
@@ -101,14 +177,150 @@ var router = function (
     return prefetching;
   };
 
+  updatePath = function (pathTemplate, params) {
+
+    var splitPath = [];
+    var path;
+
+    if (ng.isUndefined(pathTemplate)) { return; }
+
+    pathTemplate.split('/').forEach(function (segment) {
+
+      if (segment.charAt(0) === ':') {
+        splitPath.push(params[segment.substr(1)]);
+      } else {
+        splitPath.push(segment);
+      }
+    });
+
+    path = splitPath.join('/');
+    $location.path(path);
+  };
+
+  /*
+    Checks if path exists in router config
+  */
+  hasPath = function (path) {
+
+    if (ng.isDefined(pathsConfig[path])) {
+      return true;
+    }
+
+    if (convertToPathTemplate(path) !== false) {
+      return true;
+    }
+
+    return false;
+  };
+
+  /*
+    Converts path to path template
+
+    Returns
+
+    - path template
+    - false for no matched path template
+  */
+  convertToPathTemplate = function (path) {
+
+    var foundPathTemplate = false;
+    var splitPath = path.split('/');
+    var pathTemplates = Object.keys(pathsConfig);
+
+    pathTemplates.every(function (pathTemplate) {
+
+      var splitPathTemplate = pathTemplate.split('/');
+      var splitTestPath = [];
+      var testPath;
+
+      if (splitPathTemplate.length !== splitPath.length) {
+        return true;
+      }
+
+      splitPathTemplate.forEach(function (segment, index) {
+
+        if (segment.charAt(0) === ':') {
+          splitTestPath.push(splitPath[index]);
+        }
+        else {
+          splitTestPath.push(segment);
+        }
+      });
+
+      testPath = splitTestPath.join('/');
+      if (testPath !== path) {
+        return true;
+      }
+
+      foundPathTemplate = pathTemplate;
+
+      return false;
+    });
+
+    return foundPathTemplate;
+  };
+
+  /*
+    Retrieve params from a path
+  */
+  pathParams = function (pathTemplate, path) {
+
+    var params;
+    var splitPathTemplate = pathTemplate.split('/');
+    var splitPath = path.split('/');
+
+    splitPathTemplate.forEach(function (segment, index) {
+
+      if (segment.charAt(0) !== ':') {
+        return;
+      }
+
+      params = params || {};
+      params[segment.substr(1)] = splitPath[index];
+    });
+
+    return params;
+  };
+
+  /*
+    Navigates to a route when passed a path.
+  */
+  def.goByPath = function (path) {
+
+    var pathExists = hasPath(path);
+    var pathTemplate;
+    var routeName;
+    var params;
+
+    if (!pathExists) {
+      $rootScope.$broadcast(errorEvent,
+        {
+          type: 'unknown_path',
+          message: 'Path ' + path + ' does not match a route'
+        },
+        undefined,
+        kloyRoute
+      );
+      return $q.reject('unknown_path');
+    }
+
+    pathTemplate = convertToPathTemplate(path);
+    routeName = pathsConfig[pathTemplate];
+    params = pathParams(pathTemplate, path);
+
+    return def.go(routeName, params);
+  };
+
+  /*
+    Navigates to given route with passed params.
+  */
   def.go = function (routeName, params) {
 
-    var helpers, configFns, permissions, promise, msg, requiredParams,
-        prefetchFn, previousErr, routeData;
+    var promise, msg, previousErr, routeConfig;
 
-    configFns = routes[routeName];
+    routeConfig = routerConfig[routeName];
 
-    if (! ng.isArray(configFns)) {
+    if (ng.isUndefined(routeConfig)) {
       throw 'router.go() unknown route ' + routeName;
     }
 
@@ -120,52 +332,12 @@ var router = function (
 
     $rootScope.$broadcast(startEvent, routeName, kloyRoute);
 
-    helpers = {
-      permissions: function (listOfPermissions) {
-
-        if (ng.isDefined(listOfPermissions)) {
-          permissions = listOfPermissions;
-        }
-
-        return permissions;
-      },
-      requireParams: function (params) {
-
-        if (ng.isDefined(params)) {
-          requiredParams = params;
-        }
-
-        return requiredParams;
-      },
-      prefetch: function (fn) {
-
-        if (ng.isDefined(fn)) {
-          prefetchFn = fn;
-        }
-
-        return prefetchFn;
-      },
-      data: function (obj) {
-
-        if (ng.isDefined(obj)) {
-          routeData = ng.copy(obj);
-        }
-
-        return routeData;
-      }
-    };
-
-    configFns.forEach(function (configFn) {
-
-      configFn.bind(helpers)();
-    });
-
     previousErr = false;
-    promise = checkPermissions(permissions).
+    promise = checkPermissions(routeConfig.permissions).
       then(
         function () {
 
-          return checkParams(params, requiredParams);
+          return checkParams(params, routeConfig.requiredParams);
         },
         function (err) {
 
@@ -189,7 +361,7 @@ var router = function (
       then(
         function () {
 
-          return doPrefetch(prefetchFn);
+          return doPrefetch(routeConfig.prefetchFn);
         },
         function (err) {
 
@@ -234,11 +406,15 @@ var router = function (
       then(
         function (data) {
 
+          var path = routeConfig.path;
+
           kloyRoute._update({
             params: params,
             name: routeName,
-            data: routeData
+            data: routeConfig.data,
+            path: path
           });
+          updatePath(path, params);
 
           // All went well, broadcast success event
           $rootScope.$broadcast(successEvent, routeName, kloyRoute);
@@ -263,6 +439,9 @@ var router = function (
 
     return def;
   };
+
+  buildRouterConfig();
+  buildPathsConfig();
 
   return def;
 };

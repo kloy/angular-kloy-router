@@ -369,4 +369,130 @@ describe('A Router', function () {
 
       expect(inject).toThrow();
     });
+
+  it('should update path when route changes', function () {
+
+    module(function (kloyRouterProvider) {
+
+      kloyRouterProvider.addRoute('base', function () {
+
+        this.path('/home');
+      });
+    });
+
+    var $i = injector(),
+        router = $i.get('kloyRouter'),
+        $location = $i.get('$location');
+
+    expect($location.path()).toBe('');
+    router.go('base');
+    $apply();
+    expect($location.path()).toBe('/home');
+  });
+
+  it(
+    'should change route when $locationChangeSuccess is broadcasted with ' +
+    'matching path',
+    function () {
+
+      module(function (kloyRouterProvider) {
+
+        kloyRouterProvider.addRoute('example', function () {
+
+          this.path('/example');
+        });
+      });
+
+      var $i = injector(),
+          route = $i.get('kloyRoute'),
+          $location = $i.get('$location');
+
+      $location.path('/example');
+      $apply();
+      expect(route.name()).toBe('example');
+    }
+  );
+
+  it(
+    'should broadcast error when asked to change to unmatched path',
+    function () {
+
+      var $i = injector(),
+          router = $i.get('kloyRouter'),
+          scope = $i.get('$rootScope'),
+          events = $i.get('KLOY_ROUTER_EVENTS'),
+          result;
+
+      scope.$on(events.ROUTE_CHANGE_ERROR, function (e, err) {
+
+        result = err;
+      });
+      router.goByPath('/unknown');
+      $apply();
+      expect(result.type).toBe('unknown_path');
+    }
+  );
+
+  it('should match route when path includes params', function () {
+
+    module(function (kloyRouterProvider) {
+
+        kloyRouterProvider.addRoute('contact.delete', function () {
+
+          this.path('/contacts/:id/delete');
+        });
+      });
+
+      var $i = injector(),
+          route = $i.get('kloyRoute'),
+          $location = $i.get('$location');
+
+      $location.path('/contacts/abcd/delete');
+      $apply();
+      expect(route.name()).toBe('contact.delete');
+  });
+
+  it(
+    'should include params in route change when path includes params',
+    function () {
+
+      module(function (kloyRouterProvider) {
+
+        kloyRouterProvider.addRoute('contact.delete', function () {
+
+          this.path('/contacts/:id/delete');
+        });
+      });
+
+      var $i = injector(),
+          route = $i.get('kloyRoute'),
+          $location = $i.get('$location');
+
+      $location.path('/contacts/abcd/delete');
+      $apply();
+      expect(route.params()).toEqual({'id': 'abcd'});
+    }
+  );
+
+  it('should interpolate path variables with route params', function () {
+
+    module(function (kloyRouterProvider) {
+
+      kloyRouterProvider.addRoute('contact.view', function () {
+
+        this.path('/contacts/:id');
+      });
+    });
+
+    var $i = injector(),
+        router = $i.get('kloyRouter'),
+        $location = $i.get('$location');
+
+    router.go('contact.view', {
+      id: 'abcd'
+    });
+    $apply();
+
+    expect($location.path()).toBe('/contacts/abcd');
+  });
 });

@@ -28,7 +28,7 @@ ng.module('kloy.router', []).
     });
   }).
   run(/*@ngInject*/function (
-    $rootScope, KLOY_ROUTER_EVENTS, kloyRouter
+    $rootScope, KLOY_ROUTER_EVENTS, kloyRouter, $location, kloyRoute
   ) {
 
     $rootScope.$on(
@@ -38,4 +38,19 @@ ng.module('kloy.router', []).
         kloyRouter.go(routeName, params);
       }
     );
+
+    $rootScope.$on('$locationChangeSuccess', function (e, newUrl, oldUrl) {
+
+      var path = $location.path(),
+          routePath = kloyRoute.path();
+
+      // Should do following...
+      // Check if new URL is not old URL
+      // Check if route's path is not new path
+
+      if (newUrl !== oldUrl && path !== routePath) {
+        path = $location.path();
+        kloyRouter.goByPath(path);
+      }
+    });
   });

@@ -75,12 +75,14 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should attempt route transition when kloyRouteChangeRequest is heard</s>
 * <s>should allow modifying already defined route</s>
 * <s>should throw exception when attempting to modify undefined route</s>
-* should match location's path to route on $locationChangeSuccess
-* should broadcast error when path cannot be matched to route
-* should interpolate path variables with route params
-* should sync location's path with route
-* should treat all paths as lowercased
-* should get path for matched route
+* <s>should update path when route changes</s>
+* <s>should change route when $locationChangeSuccess is broadcasted with matching path</s>
+* <s>should broadcast error when asked to change to unmatched path</s>
+* <s>should match route when path includes params</s>
+* <s>should include params in route change when path includes params</s>
+* <s>should interpolate path variables with route params</s>
+* should lowercase, trim and remove unnecessary slashes from paths when matching to route
+* should throw exception if same path is configured for multiple routes
 * (is this needed?) should not change routes when navigating to current route
 
 ### A Route
@@ -98,9 +100,9 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * should navigate to provided route when clicked
 * should modify href when provided route has configured path
 * should pass provided params
-* should modify href with interpolated path with params
 * should log error when provided route is unknown
 * should allow directive to be used on more than one element
+* should modify href with interpolated path with params
 
 ### A LayoutManager
 * <s>should allow syncing</s>
