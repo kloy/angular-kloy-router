@@ -82,6 +82,7 @@ ng.module('kloy.router', []).
   provider('kloyRouter', require('./router')).
   provider('kloyLayoutManager', require('./layout-manager')).
   factory('kloyRoute', require('./route')).
+  directive('kloyRref', require('./rref-directive')).
   run(/*@ngInject*/["kloyLayoutManager", "$rootScope", "KLOY_ROUTER_EVENTS", function (
     kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
   ) {
@@ -124,7 +125,7 @@ ng.module('kloy.router', []).
     });
   }]);
 
-},{"./layout-manager":1,"./route":5,"./router":6,"ng":"QBxXRv"}],5:[function(require,module,exports){
+},{"./layout-manager":1,"./route":5,"./router":6,"./rref-directive":7,"ng":"QBxXRv"}],5:[function(require,module,exports){
 var ng = require('ng');
 
 var route = /*@ngInject*/function () {
@@ -260,7 +261,7 @@ var router = function (
 
           return config.permissions;
         },
-        requireParams: function (params) {
+        requiredParams: function (params) {
 
           if (ng.isDefined(params)) {
             config.requiredParams = params;
@@ -738,4 +739,54 @@ var routerProvider = function () {
 
 module.exports = routerProvider;
 
-},{"ng":"QBxXRv"}]},{},[4])
+},{"ng":"QBxXRv"}],7:[function(require,module,exports){
+var rrefDirective = /*@ngInject*/["$log", "kloyRouter", "$compile", "$rootScope", function (
+  $log, kloyRouter, $compile, $rootScope
+) {
+
+  var def = {
+    restrict: 'A'
+  };
+
+  var isAnchor = function (el) {
+
+    return el[0].tagName.toUpperCase() === 'A';
+  };
+
+  $rootScope.kloyToRoute = function (routeName, routeParams) {
+
+    kloyRouter.toRoute(routeName, routeParams);
+  };
+
+  def.compile = function (tEl, tAttrs) {
+
+    var ngClickValue = 'kloyToRoute(' + tAttrs.kloyRref;
+    ngClickValue = (
+      tAttrs.kloyRrefParams ?
+      ngClickValue + ', ' + tAttrs.kloyRrefParams + ')' :
+      ngClickValue + ')'
+    );
+
+    tAttrs.$set('ngClick', ngClickValue);
+    if (isAnchor(tEl)) {
+      tAttrs.$set('href', '');
+    }
+    tAttrs.$set('kloyRref', null);
+    tAttrs.$set('kloyRrefParams', null);
+
+    return function (scope, el) {
+
+      var clone, reCompiled;
+
+      clone = el.clone();
+      reCompiled = $compile(clone)(scope);
+      el.replaceWith(reCompiled);
+    };
+  };
+
+  return def;
+}];
+
+module.exports = rrefDirective;
+
+},{}]},{},[4])

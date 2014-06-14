@@ -13,6 +13,7 @@ ng.module('kloy.router', []).
   provider('kloyRouter', require('./router')).
   provider('kloyLayoutManager', require('./layout-manager')).
   factory('kloyRoute', require('./route')).
+  directive('kloyRref', require('./rref-directive')).
   run(/*@ngInject*/function (
     kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
   ) {

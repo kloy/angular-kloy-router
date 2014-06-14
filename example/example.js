@@ -59,10 +59,6 @@ angular.module('example', ['kloy.router']).
   }).
   run(/*@ngInject*/function ($log, $rootScope, kloyRouter) {
 
-    $rootScope.go = function (name, params) {
-      $log.debug('Go to route: %s', name, params);
-      kloyRouter.toRoute(name, params);
-    };
     $log.debug('Example running');
     $rootScope.$on('kloyRouteChangeStart', function () {
 

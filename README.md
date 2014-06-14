@@ -82,7 +82,7 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should include params in route change when path includes params</s>
 * <s>should interpolate path variables with route params</s>
 * <s>should lowercase, trim, replace spaces with %20 and remove unnecessary slashes from paths when matching to route</s>
-* should throw exception if same path is configured for multiple routes
+* <s>should throw exception if same path is configured for multiple routes</s>
 
 ### A Route
 * <s>should contain current route's name</s>

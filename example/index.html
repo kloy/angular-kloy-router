@@ -3,20 +3,23 @@
 <head>
 	<title>Kloy Router Example</title>
 	<script type="text/javascript" src="/bower_components/angular/angular.js"></script>
-	<script type="text/javascript" src="/dist/angular-kloy-router.js"></script>
+	<script type="text/javascript" src="/build/angular-kloy-router.js"></script>
 	<script type="text/javascript" src="example.js"></script>
 </head>
 <body>
 	<h1>Kloy Router Example</h1>
 	<ul>
 		<li>
-			<a href="" ng-click="go('home')">Home</a>
+			<a kloy-rref="'home'">Home</a>
 		</li>
 		<li>
-			<a href="" ng-click="go('profile')">Profile</a>
+			<a kloy-rref="'profile'">Profile</a>
 		</li>
 		<li>
-			<a href="" ng-click="go('contact.view', {id: 'abcd'})">View Contact</a>
+			<a
+				kloy-rref="'contact.view'"
+				kloy-rref-params="{id: 'abcd'}"
+			>View Contact</a>
 		</li>
 	</ul>
 

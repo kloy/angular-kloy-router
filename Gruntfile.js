@@ -67,7 +67,7 @@ module.exports = function (grunt) {
       server: {
         options: {
           port: 9000,
-          keepalive: true,
+          // keepalive: true,
           open: 'http://localhost:9000/example'
         }
       }
@@ -99,6 +99,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('example', [
     'dist',
-    'connect:server'
+    'connect:server',
+    'watch:build'
   ]);
 };
