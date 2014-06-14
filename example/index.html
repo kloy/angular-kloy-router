@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="example">
 <head>
 	<title>Kloy Router Example</title>
 	<script type="text/javascript" src="/bower_components/angular/angular.js"></script>
@@ -9,8 +9,15 @@
 <body>
 	<h1>Kloy Router Example</h1>
 	<ul>
-		<li><a kloy-rref="home">Home</a></li>
-		<li><a kloy-rref="profile">Profile</a></li>
+		<li>
+			<a href="" ng-click="go('home')">Home</a>
+		</li>
+		<li>
+			<a href="" ng-click="go('profile')">Profile</a>
+		</li>
+		<li>
+			<a href="" ng-click="go('contact.view', {id: 'abcd'})">View Contact</a>
+		</li>
 	</ul>
 
 	<ng-include src="section('main')"></ng-include>

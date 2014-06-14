@@ -210,7 +210,7 @@ describe('A Router', function () {
 
       kloyRouterProvider.addRoute('params', function () {
 
-        this.requireParams(['id', 'name', 'age']);
+        this.requiredParams(['id', 'name', 'age']);
       });
     });
 

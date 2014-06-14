@@ -67,7 +67,8 @@ module.exports = function (grunt) {
       server: {
         options: {
           port: 9000,
-          keepalive: true
+          keepalive: true,
+          open: 'http://localhost:9000/example'
         }
       }
     }

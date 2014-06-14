@@ -57,7 +57,7 @@ var router = function (
 
           return config.permissions;
         },
-        requireParams: function (params) {
+        requiredParams: function (params) {
 
           if (ng.isDefined(params)) {
             config.requiredParams = params;

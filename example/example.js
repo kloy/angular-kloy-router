@@ -1,57 +1,79 @@
-angular.module('example', []).
+angular.module('example', ['kloy.router']).
   config(/*@ngInject*/function (kloyRouterProvider) {
 
     kloyRouterProvider.
 
-      addPermission('password', /*@ngInject*/function ($q) {
+      addPermission('password', /*@ngInject*/function ($q, $log) {
 
         var dfd = $q.defer();
+        $log.debug('Checking password permission');
         dfd.resolve('authed');
 
         return dfd.promise;
       }).
 
-      addRoute('home', /*@ngInject*/function () {
+      addRoute('home', function () {
 
-        this.
-          permissions(['password']).
-          params(['foo', 'bar']).
-          data({name: 'awesome'}).
-          path('/my/path');
+        this.permissions(['password']);
+        this.data({name: 'awesome'});
+        this.path('/home');
       }).
 
-      addRoute('profile', /*@ngInject*/function () {
+      addRoute('profile', function () {
 
-        this.
-          permissions(['password']).
-          path('/about');
+        this.permissions(['password']);
+        this.path('/about');
+      }).
+
+      addRoute('contact.view', function () {
+
+        this.permissions(['password']);
+        this.path('/contact/:id');
+        this.requiredParams(['id']);
       });
   }).
   config(/*@ngInject*/function (kloyLayoutManagerProvider) {
 
     kloyLayoutManagerProvider.
-      addSection('main', /*@ngInject*/function (kloyRoute) {
+      addSection('main', /*@ngInject*/function (kloyRoute, $log) {
 
         var templates = {
-          home: 'templates/home.html',
-          profile: 'templates/profile.html'
+          home: '/example/home.html',
+          profile: '/example/profile.html',
+          'contact.view': '/example/contact-view.html'
         };
 
+        $log.debug('syncing section "main"');
         this.template(templates[kloyRoute.name()]);
       }).
 
-      addSection('sidebar', /*@ngInject*/function () {
+      addSection('sidebar', /*@ngInject*/function ($log) {
 
-        this.template('templates/sidebar.html');
+        $log.debug('syncing section "sidebar"');
+        this.template('/example/sidebar.html');
       });
   }).
-  run(/*@ngInject*/function ($log) {
+  controller('ContactViewCtrl', /*@ngInject*/function ($scope, kloyRoute) {
 
+    $scope.contactID = kloyRoute.params().id;
+  }).
+  run(/*@ngInject*/function ($log, $rootScope, kloyRouter) {
+
+    $rootScope.go = function (name, params) {
+      $log.debug('Go to route: %s', name, params);
+      kloyRouter.toRoute(name, params);
+    };
     $log.debug('Example running');
-  });
+    $rootScope.$on('kloyRouteChangeStart', function () {
 
-try {
-  angular.bootstrap(document, ['example']);
-} catch (e) {
-  console.error(e.message, e);
-}
+      $log.debug('kloyRouteChangeStart', arguments);
+    });
+    $rootScope.$on('kloyRouteChangeSuccess', function () {
+
+      $log.debug('kloyRouteChangeSuccess', arguments);
+    });
+    $rootScope.$on('kloyRouteChangeError', function () {
+
+      $log.debug('kloyRouteChangeError', arguments);
+    });
+  });
