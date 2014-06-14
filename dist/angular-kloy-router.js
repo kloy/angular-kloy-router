@@ -104,7 +104,7 @@ ng.module('kloy.router', []).
       KLOY_ROUTER_EVENTS.ROUTE_CHANGE_REQUEST,
       function routeListener (e, routeName, params) {
 
-        kloyRouter.go(routeName, params);
+        kloyRouter.toRoute(routeName, params);
       }
     );
 
@@ -119,7 +119,7 @@ ng.module('kloy.router', []).
 
       if (newUrl !== oldUrl && path !== routePath) {
         path = $location.path();
-        kloyRouter.goByPath(path);
+        kloyRouter.toPath(path);
       }
     });
   }]);
@@ -209,7 +209,7 @@ var router = function (
 ) {
 
   var checkPermissions, checkParams, doPrefetch, buildRouterConfig, updatePath,
-      buildPathsConfig, hasPath, convertToPathTemplate, pathParams,
+      buildPathsConfig, hasPath, convertToPathTemplate, pathParams, cleanPath,
       def = {},
       routerConfig = {},
       pathsConfig = {},
@@ -217,6 +217,31 @@ var router = function (
       successEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS,
       errorEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_ERROR,
       isPaused = false;
+
+  /*
+    Cleans a path to be in a standard format.
+  */
+  cleanPath = function (path) {
+
+    // dump(path);
+    path = path.trim();
+    // replace multiple spaces with single space
+    path = path.replace(/ +(?= )/g, '');
+    // replace all spaces with %20
+    path = path.replace(/ /g, '%20');
+    // replace double slashes with single slash
+    path = path.replace(/([^:]\/)\/+/g, "$1");
+    path = path.toLowerCase();
+    // Ensure first char is /
+    path = path.charAt(0) !== '/' ? '/' + path : path;
+    // Ensure last char is not /
+    path = (
+      path.charAt(path.length - 1) === '/' ?
+      path.substring(0, path.length - 1) : path
+    );
+
+    return path;
+  };
 
   buildRouterConfig = function () {
 
@@ -262,7 +287,7 @@ var router = function (
         path: function (path) {
 
           if (ng.isDefined(path)) {
-            config.path = path;
+            config.path = cleanPath(path);
           }
 
           return config.path;
@@ -285,6 +310,11 @@ var router = function (
       var path = routeConfig.path;
 
       if (ng.isDefined(path)) {
+        if (path in pathsConfig) {
+          throw "router.buildPathsConfig(): path already defined for route " +
+            pathsConfig[path] + " cannot define duplicate for route " +
+            routeName;
+        }
         pathsConfig[path] = routeName;
       }
     });
@@ -468,9 +498,9 @@ var router = function (
   */
   pathParams = function (pathTemplate, path) {
 
-    var params;
-    var splitPathTemplate = pathTemplate.split('/');
-    var splitPath = path.split('/');
+    var params,
+        splitPathTemplate = pathTemplate.split('/'),
+        splitPath = path.split('/');
 
     splitPathTemplate.forEach(function (segment, index) {
 
@@ -488,12 +518,12 @@ var router = function (
   /*
     Navigates to a route when passed a path.
   */
-  def.goByPath = function (path) {
+  def.toPath = function (path) {
 
-    var pathExists = hasPath(path);
-    var pathTemplate;
-    var routeName;
-    var params;
+    var pathExists, pathTemplate, routeName, params;
+
+    path = cleanPath(path);
+    pathExists = hasPath(path);
 
     if (!pathExists) {
       $rootScope.$broadcast(errorEvent,
@@ -511,24 +541,24 @@ var router = function (
     routeName = pathsConfig[pathTemplate];
     params = pathParams(pathTemplate, path);
 
-    return def.go(routeName, params);
+    return def.toRoute(routeName, params);
   };
 
   /*
     Navigates to given route with passed params.
   */
-  def.go = function (routeName, params) {
+  def.toRoute = function (routeName, params) {
 
     var promise, msg, previousErr, routeConfig;
 
     routeConfig = routerConfig[routeName];
 
     if (ng.isUndefined(routeConfig)) {
-      throw 'router.go() unknown route ' + routeName;
+      throw 'router.toRoute() unknown route ' + routeName;
     }
 
     if (isPaused) {
-      msg = 'router.go(): paused, cannot go to ' + routeName;
+      msg = 'router.toRoute(): paused, cannot go to ' + routeName;
       $log.debug(msg);
       return $q.reject(msg);
     }
@@ -546,7 +576,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('router.go(): permissions error', err, routeName);
+          $log.debug('router.toRoute(): permissions error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -570,7 +600,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('router.go(): params error', err, routeName);
+          $log.debug('router.toRoute(): params error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {
@@ -591,7 +621,7 @@ var router = function (
 
           if (previousErr) { return $q.reject(err); }
 
-          $log.debug('router.go(): prefetch error', err, routeName);
+          $log.debug('router.toRoute(): prefetch error', err, routeName);
           $rootScope.$broadcast(
             errorEvent,
             {

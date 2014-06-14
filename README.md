@@ -81,9 +81,8 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should match route when path includes params</s>
 * <s>should include params in route change when path includes params</s>
 * <s>should interpolate path variables with route params</s>
-* should lowercase, trim and remove unnecessary slashes from paths when matching to route
+* <s>should lowercase, trim, replace spaces with %20 and remove unnecessary slashes from paths when matching to route</s>
 * should throw exception if same path is configured for multiple routes
-* (is this needed?) should not change routes when navigating to current route
 
 ### A Route
 * <s>should contain current route's name</s>
@@ -112,7 +111,7 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 
 
 # API for module
-* kloyRouter
+* kloyRouterProvider
 	* addRoute(routeName, routeConfigFn)
 	* modifyRoute(routeName, routeConfigFn)
 	* addPermission(permissionName, permissionConfigFn)
@@ -122,6 +121,9 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 			* path(string)
 			* prefetch(function returning promise)
 		* permissionConfigFn -> returns promise
+* kloyRouter
+	* toRoute(name, params)
+	* toPath(path)
 	* EVENTS
 		* kloyRouteChangeStart (e, routeName, kloyRoute)
 		* kloyRouteChangeSuccess (e, routeName, kloyRoute)

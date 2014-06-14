@@ -21,7 +21,7 @@ describe('A Router', function () {
     scope.$on(events.ROUTE_CHANGE_SUCCESS, function (e, name) {
       result = name;
     });
-    router.go('home');
+    router.toRoute('home');
     $apply();
     expect(result).toBe('home');
   });
@@ -31,7 +31,7 @@ describe('A Router', function () {
     var router = injector().get('kloyRouter');
 
     function test () {
-      router.go('unknown.route');
+      router.toRoute('unknown.route');
     }
 
     expect(test).toThrow();
@@ -64,7 +64,7 @@ describe('A Router', function () {
       result = 'called';
     });
     router.pause();
-    router.go('home');
+    router.toRoute('home');
     $apply();
 
     expect(result).toBe('not called');
@@ -88,12 +88,12 @@ describe('A Router', function () {
       result = name;
     });
     router.pause();
-    router.go('home');
+    router.toRoute('home');
     $apply();
     expect(result).toBe('not called');
 
     router.play();
-    router.go('about');
+    router.toRoute('about');
     $apply();
     expect(result).toBe('about');
   });
@@ -131,7 +131,7 @@ describe('A Router', function () {
       var $i = injector(),
           router = $i.get('kloyRouter');
 
-      router.go('home');
+      router.toRoute('home');
       $apply();
 
       expect(permissionChecked1).toBe('permission checked');
@@ -180,7 +180,7 @@ describe('A Router', function () {
 
         result = err.message;
       });
-      router.go('base');
+      router.toRoute('base');
       $apply();
 
       expect(result).toBe('you are a failure');
@@ -198,7 +198,7 @@ describe('A Router', function () {
         router = $i.get('kloyRouter'),
         route = $i.get('kloyRoute');
 
-    router.go('params', {id: 'abcd'});
+    router.toRoute('params', {id: 'abcd'});
     $apply();
 
     expect(route.params()).toEqual({id: 'abcd'});
@@ -224,7 +224,7 @@ describe('A Router', function () {
 
       result = err.message;
     });
-    router.go('params', {name: 'awesome'});
+    router.toRoute('params', {name: 'awesome'});
     $apply();
 
     expect(result).toBe('missing required param(s) id, age');
@@ -249,7 +249,7 @@ describe('A Router', function () {
     });
 
     var router = injector().get('kloyRouter');
-    router.go('home');
+    router.toRoute('home');
     $apply();
 
     expect(result).toBe('prefetched');
@@ -280,7 +280,7 @@ describe('A Router', function () {
       scope.$on(events.ROUTE_CHANGE_ERROR, function (e, err) {
         result = err.type;
       });
-      router.go('home');
+      router.toRoute('home');
       $apply();
 
       expect(result).toBe('prefetch');
@@ -304,7 +304,7 @@ describe('A Router', function () {
     scope.$on(events.ROUTE_CHANGE_START, function (e, routeName) {
       result = routeName;
     });
-    router.go('home');
+    router.toRoute('home');
     $apply();
 
     expect(result).toBe('home');
@@ -353,7 +353,7 @@ describe('A Router', function () {
         router = $i.get('kloyRouter'),
         route = $i.get('kloyRoute');
 
-    router.go('base');
+    router.toRoute('base');
     $apply();
 
     expect(route.data()).toEqual({name: 'keith'});
@@ -385,7 +385,7 @@ describe('A Router', function () {
         $location = $i.get('$location');
 
     expect($location.path()).toBe('');
-    router.go('base');
+    router.toRoute('base');
     $apply();
     expect($location.path()).toBe('/home');
   });
@@ -427,7 +427,7 @@ describe('A Router', function () {
 
         result = err;
       });
-      router.goByPath('/unknown');
+      router.toPath('/unknown');
       $apply();
       expect(result.type).toBe('unknown_path');
     }
@@ -488,11 +488,56 @@ describe('A Router', function () {
         router = $i.get('kloyRouter'),
         $location = $i.get('$location');
 
-    router.go('contact.view', {
+    router.toRoute('contact.view', {
       id: 'abcd'
     });
     $apply();
 
     expect($location.path()).toBe('/contacts/abcd');
   });
+
+  it(
+    'should lowercase, trim, replace spaces with %20 and remove unnecessary ' +
+    'slashes from paths when matching to route',
+    function () {
+
+      module(function (kloyRouterProvider) {
+
+        kloyRouterProvider.addRoute('test', function () {
+
+          this.path('/MY/really//rediculous/:name//exa  mple');
+        });
+      });
+
+      var $i = injector(),
+          $location = $i.get('$location'),
+          route = $i.get('kloyRoute');
+
+      $location.path('MY/really/ReDiculous/aBCd/exa mple/');
+      $apply();
+      expect(route.name()).toBe('test');
+      expect(route.params()).toEqual({name: 'abcd'});
+    }
+  );
+
+  it(
+    'should throw exception if same path is configured for multiple routes',
+    function () {
+
+      module(function (kloyRouterProvider) {
+
+        kloyRouterProvider.
+          addRoute('home', function () {
+
+            this.path('/home');
+          }).
+          addRoute('base', function () {
+
+            this.path('/home');
+          });
+      });
+
+      expect(inject).toThrow();
+    }
+  );
 });

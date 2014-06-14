@@ -78,7 +78,7 @@ describe('A LayoutManager', function () {
     var router = injector().get('kloyRouter'),
         scope = injector().get('$rootScope');
 
-    router.go('home');
+    router.toRoute('home');
     $apply();
     expect(scope.section('master')).toBe('templates/home.html');
   });

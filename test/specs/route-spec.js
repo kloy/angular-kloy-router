@@ -15,7 +15,7 @@ describe('A Route', function () {
         router = $i.get('kloyRouter'),
         route = $i.get('kloyRoute');
 
-    router.go('home');
+    router.toRoute('home');
     $apply();
     expect(route.name()).toBe('home');
   });
@@ -32,7 +32,7 @@ describe('A Route', function () {
         router = $i.get('kloyRouter'),
         route = $i.get('kloyRoute');
 
-    router.go('home');
+    router.toRoute('home');
     $apply();
     expect(route.data()).toEqual({foo: 'bar'});
   });
@@ -47,7 +47,7 @@ describe('A Route', function () {
         router = $i.get('kloyRouter'),
         route = $i.get('kloyRoute');
 
-    router.go('home', {my: 'params'});
+    router.toRoute('home', {my: 'params'});
     $apply();
     expect(route.params()).toEqual({my: 'params'});
   });

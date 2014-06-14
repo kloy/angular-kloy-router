@@ -35,7 +35,7 @@ ng.module('kloy.router', []).
       KLOY_ROUTER_EVENTS.ROUTE_CHANGE_REQUEST,
       function routeListener (e, routeName, params) {
 
-        kloyRouter.go(routeName, params);
+        kloyRouter.toRoute(routeName, params);
       }
     );
 
@@ -50,7 +50,7 @@ ng.module('kloy.router', []).
 
       if (newUrl !== oldUrl && path !== routePath) {
         path = $location.path();
-        kloyRouter.goByPath(path);
+        kloyRouter.toPath(path);
       }
     });
   });
