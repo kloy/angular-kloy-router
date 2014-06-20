@@ -83,6 +83,12 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should interpolate path variables with route params</s>
 * <s>should lowercase, trim, replace spaces with %20 and remove unnecessary slashes from paths when matching to route</s>
 * <s>should throw exception if same path is configured for multiple routes</s>
+* <s>should allow getting path when given a route name</s>
+* <s>should return null when no path exists for known route</s>
+* <s>should throw exception when getting path for unknown route</s>
+* <s>should allow getting path when given a route name and params</s>
+* <s>should throw exception when path is found and all required params are not included</s>
+* should change on first $locationChangeSuccess
 
 ### A Route
 * <s>should contain current route's name</s>
@@ -102,6 +108,7 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * should log error when provided route is unknown
 * should allow directive to be used on more than one element
 * should modify href with interpolated path with params
+* should cleanup when element is removed from dom
 
 ### A LayoutManager
 * <s>should allow syncing</s>

@@ -83,7 +83,6 @@ module.exports = function (grunt) {
     'jshint:plugin',
     'browserify:plugin',
     'uglify:plugin',
-    // 'karma:continuous',
     'karma:unit',
     'watch',
   ]);

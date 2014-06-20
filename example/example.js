@@ -57,9 +57,22 @@ angular.module('example', ['kloy.router']).
 
     $scope.contactID = kloyRoute.params().id;
   }).
-  run(/*@ngInject*/function ($log, $rootScope, kloyRouter) {
+  run(/*@ngInject*/function (
+    $log, $rootScope, kloyRouter, kloyLayoutManager, $location
+  ) {
 
     $log.debug('Example running');
+    // This should not be needed. Need to re-think how to ensure route syncs.
+    kloyRouter.toPath($location.path());
+
+    $rootScope.$on('$locationChangeStart', function () {
+
+      $log.debug('$locationChangeStart', arguments);
+    });
+    $rootScope.$on('$locationChangeSuccess', function () {
+
+      $log.debug('$locationChangeSuccess', arguments);
+    });
     $rootScope.$on('kloyRouteChangeStart', function () {
 
       $log.debug('kloyRouteChangeStart', arguments);

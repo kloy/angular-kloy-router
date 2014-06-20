@@ -227,7 +227,7 @@ describe('A Router', function () {
     router.toRoute('params', {name: 'awesome'});
     $apply();
 
-    expect(result).toBe('missing required param(s) id, age');
+    expect(result).toBe('missing required param(s)');
   });
 
   it('should prefetch before changing states', function () {
@@ -538,6 +538,82 @@ describe('A Router', function () {
       });
 
       expect(inject).toThrow();
+    }
+  );
+
+  it('should allow getting path when given a route name', function () {
+
+    module(function (kloyRouterProvider) {
+      kloyRouterProvider.addRoute('home', function () {
+        this.path('/home');
+      });
+    });
+
+    var router = injector().get('kloyRouter');
+    var result = router.getPathFor('home');
+
+    expect(result).toBe('/home');
+  });
+
+  it('should return null when no path exists for known route', function () {
+
+    module(function (kloyRouterProvider) {
+      kloyRouterProvider.addRoute('base', function () {});
+    });
+
+    var router = injector().get('kloyRouter');
+    var result = router.getPathFor('base');
+
+    expect(result).toBe(null);
+  });
+
+  it('should throw exception when getting path for unknown route', function () {
+
+    var router = injector().get('kloyRouter');
+    function test () {
+      router.getPathFor('unknown');
+    }
+
+    expect(test).toThrow();
+  });
+
+  it(
+    'should allow getting path when given a route name and params',
+    function () {
+
+      module(function (kloyRouterProvider) {
+        kloyRouterProvider.addRoute('contact.view', function () {
+          this.path('/contacts/:id');
+        });
+      });
+
+      var router = injector().get('kloyRouter');
+      var result = router.getPathFor('contact.view', {id: 'abcd'});
+
+      expect(result).toBe('/contacts/abcd');
+    }
+  );
+
+  it(
+    'should throw exception when path is found and all required params are ' +
+    'not included',
+    function () {
+
+      module(function (kloyRouterProvider) {
+
+        kloyRouterProvider.addRoute('example', function () {
+
+          this.path('/example/:id/:name');
+          this.requiredParams(['id', 'name']);
+        });
+      });
+
+      var router = injector().get('kloyRouter');
+      function test () {
+        router.getPathFor('example', {id: 'abcd'});
+      }
+
+      expect(test).toThrow();
     }
   );
 });

@@ -13,7 +13,7 @@ ng.module('kloy.router', []).
   provider('kloyRouter', require('./router')).
   provider('kloyLayoutManager', require('./layout-manager')).
   factory('kloyRoute', require('./route')).
-  directive('kloyRref', require('./rref-directive')).
+  directive('srRoute', require('./route-directive')).
   run(/*@ngInject*/function (
     kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
   ) {
@@ -45,10 +45,10 @@ ng.module('kloy.router', []).
       var path = $location.path(),
           routePath = kloyRoute.path();
 
-      // Should do following...
-      // Check if new URL is not old URL
-      // Check if route's path is not new path
-
+      // TODO: test has changed
+      // Checks if first change heard
+      // Checks if new URL is not old URL
+      // Checks if route's path is not new path
       if (newUrl !== oldUrl && path !== routePath) {
         path = $location.path();
         kloyRouter.toPath(path);

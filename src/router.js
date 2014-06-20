@@ -7,6 +7,7 @@ var router = function (
 
   var checkPermissions, checkParams, doPrefetch, buildRouterConfig, updatePath,
       buildPathsConfig, hasPath, convertToPathTemplate, pathParams, cleanPath,
+      hasAllValues,
       def = {},
       routerConfig = {},
       pathsConfig = {},
@@ -14,6 +15,31 @@ var router = function (
       successEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS,
       errorEvent = KLOY_ROUTER_EVENTS.ROUTE_CHANGE_ERROR,
       isPaused = false;
+
+  /*
+    Checks to see if an array has all values
+  */
+  hasAllValues = function (iArray, values) {
+
+    var iArrayCache = {}, passed = true;
+
+    iArray.forEach(function (val) {
+
+      iArrayCache[val] = true;
+    });
+
+    values.every(function (val) {
+
+      if (iArrayCache.hasOwnProperty(val)) {
+        return true;
+      }
+
+      passed = false;
+      return false;
+    });
+
+    return passed;
+  };
 
   /*
     Cleans a path to be in a standard format.
@@ -91,6 +117,8 @@ var router = function (
         }
       };
 
+      config.requiredParams = config.requiredParams || [];
+
       configFns.forEach(function (configFn) {
 
         configFn.bind(helpers)();
@@ -155,26 +183,19 @@ var router = function (
 
   checkParams = function (params, requiredParams) {
 
-    var dfd = $q.defer(),
-        missingParams = [];
+    var dfd = $q.defer(), paramKeys;
 
     params = params || {};
+    paramKeys = Object.keys(params);
 
-    if (! ng.isArray(requiredParams)) {
+    if (requiredParams.length === 0) {
       dfd.resolve();
       return dfd.promise;
     }
 
-    requiredParams.forEach(function (name) {
+    if (!hasAllValues(paramKeys, requiredParams)) {
 
-      if (name in params) { return; }
-
-      missingParams.push(name);
-    });
-
-    if (missingParams.length) {
-
-      return $q.reject('missing required param(s) ' + missingParams.join(', '));
+      return $q.reject('missing required param(s)');
     }
 
     dfd.resolve();
@@ -454,6 +475,41 @@ var router = function (
       );
 
     return promise;
+  };
+
+  /*
+    I get the path for a given route name. When passed route params I
+    interpolate them onto the path's template segments. Returns null when
+    path is not defined for route.
+
+    Returns
+     - string path
+     - null
+  */
+  def.getPathFor = function (routeName, routeParams) {
+
+    var routeConfig, path, routeParamKeys;
+
+    routeParams = routeParams || {};
+    routeParamKeys = Object.keys(routeParams);
+    routeConfig = routerConfig[routeName];
+
+    if (ng.isDefined(routeConfig)) {
+      path = routeConfig.path || null;
+    } else {
+      throw "router.getPathFor(): Unknown route " + routeName;
+    }
+
+    if (! hasAllValues(routeParamKeys, routeConfig.requiredParams)) {
+      throw "router.getPathFor(): Missing required params for " + routeName;
+    }
+
+    ng.forEach(routeParams, function (paramVal, paramName) {
+
+      path = path.replace(':' + paramName, paramVal);
+    });
+
+    return path;
   };
 
   def.pause = function () {
