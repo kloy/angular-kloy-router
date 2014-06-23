@@ -18,11 +18,13 @@ ng.module('kloy.router', []).
     kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
   ) {
 
+    // Expose sections to scope
     $rootScope.section = function (section) {
 
       return kloyLayoutManager.sections()[section] || null;
     };
 
+    // Update layout when route changes
     $rootScope.$on(KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS, function () {
 
       kloyLayoutManager.sync();
@@ -32,6 +34,7 @@ ng.module('kloy.router', []).
     $rootScope, KLOY_ROUTER_EVENTS, kloyRouter, $location, kloyRoute
   ) {
 
+    // Update route when change request event is heard
     $rootScope.$on(
       KLOY_ROUTER_EVENTS.ROUTE_CHANGE_REQUEST,
       function routeListener (e, routeName, params) {

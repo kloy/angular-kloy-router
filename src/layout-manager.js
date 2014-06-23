@@ -1,14 +1,25 @@
+/*
+  I provide all functionality for managing a layout and defining sections for
+  a layout.
+*/
 var ng = require('ng');
 
 function LayoutManager (sectionConfigs, $rootScope, $injector) {
 
   var sections = {};
 
+  /*
+    I return a copy of all defined sections
+  */
   this.sections = function () {
 
     return ng.copy(sections);
   };
 
+  /*
+    I run all section config statements to ensure the proper templates are
+    used for each section.
+  */
   this.sync = function () {
 
     Object.keys(sectionConfigs).forEach(function (section) {
@@ -32,6 +43,9 @@ function LayoutManagerProvider () {
 
   var sectionConfigs = {};
 
+  /*
+    I defined and configure a section
+  */
   this.addSection = function (section, templateSelector) {
 
     var errMsg;

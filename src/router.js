@@ -17,7 +17,7 @@ var router = function (
       isPaused = false;
 
   /*
-    Checks to see if an array has all values
+    I check to see if an array has all of the values passed
   */
   hasAllValues = function (iArray, values) {
 
@@ -42,7 +42,7 @@ var router = function (
   };
 
   /*
-    Cleans a path to be in a standard format.
+    I clean/format a path to be in a standard format.
   */
   cleanPath = function (path) {
 
@@ -66,6 +66,9 @@ var router = function (
     return path;
   };
 
+  /*
+    I build the router configuration object
+  */
   buildRouterConfig = function () {
 
     ng.forEach(routes, function (configFns, routeName) {
@@ -128,6 +131,9 @@ var router = function (
     });
   };
 
+  /*
+    I build the path configuration object
+  */
   buildPathsConfig = function () {
 
     ng.forEach(routerConfig, function (routeConfig, routeName) {
@@ -145,6 +151,9 @@ var router = function (
     });
   };
 
+  /*
+    I async a list of permissions and return a promise
+  */
   checkPermissions = function (permissionNames) {
 
     var stubPermission, allPermissions = [];
@@ -181,6 +190,9 @@ var router = function (
     return $q.all(allPermissions);
   };
 
+  /*
+    I async check passed params against required params and return a promise
+  */
   checkParams = function (params, requiredParams) {
 
     var dfd = $q.defer(), paramKeys;
@@ -202,6 +214,11 @@ var router = function (
     return dfd.promise;
   };
 
+  /*
+    I allow any async operation to be performed and return a promise.
+    I should be used for doing preload type functionality before a route
+    change.
+  */
   doPrefetch = function (prefetchFn) {
 
     var prefetching, dfd;
@@ -228,6 +245,9 @@ var router = function (
     return prefetching;
   };
 
+  /*
+    I update the $location.path
+  */
   updatePath = function (pathTemplate, params) {
 
     var splitPath = [];
@@ -249,7 +269,7 @@ var router = function (
   };
 
   /*
-    Checks if path exists in router config
+    I check if path exists in router config
   */
   hasPath = function (path) {
 
@@ -265,7 +285,7 @@ var router = function (
   };
 
   /*
-    Converts path to path template
+    I convert a path to path template
 
     Returns
 
@@ -312,7 +332,7 @@ var router = function (
   };
 
   /*
-    Retrieve params from a path
+    I retrieve params from a path
   */
   pathParams = function (pathTemplate, path) {
 
@@ -334,7 +354,7 @@ var router = function (
   };
 
   /*
-    Navigates to a route when passed a path.
+    I navigate to a route when passed a path.
   */
   def.toPath = function (path) {
 
@@ -363,7 +383,7 @@ var router = function (
   };
 
   /*
-    Navigates to given route with passed params.
+    I navigate to given route with passed params.
   */
   def.toRoute = function (routeName, params) {
 
@@ -512,6 +532,9 @@ var router = function (
     return path;
   };
 
+  /*
+    I prevent route from making any changes when called
+  */
   def.pause = function () {
 
     isPaused = true;
@@ -519,6 +542,9 @@ var router = function (
     return def;
   };
 
+  /*
+    I allow routing changes to take place for future calls.
+  */
   def.play = function () {
 
     isPaused = false;
@@ -536,6 +562,9 @@ var routerProvider = function () {
 
   var def = {}, routes = {}, permissions = {};
 
+  /*
+    I define a route and add a configuration function for it
+  */
   def.addRoute = function (name, configFn) {
 
     if (name in routes) {
@@ -547,6 +576,10 @@ var routerProvider = function () {
     return def;
   };
 
+  /*
+    I allow modification to a route and add an additional configuration
+    function for it
+  */
   def.modifyRoute = function (name, configFn) {
 
     if (ng.isUndefined(routes[name])) {
@@ -558,6 +591,9 @@ var routerProvider = function () {
     return def;
   };
 
+  /*
+    I define a permission and add a configuration function for it
+  */
   def.addPermission = function (name, configFn) {
 
     if (name in permissions) {

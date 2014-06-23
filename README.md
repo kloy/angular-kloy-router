@@ -118,37 +118,48 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 
 
 # API for module
-* kloyRouterProvider
-	* addRoute(routeName, routeConfigFn)
-	* modifyRoute(routeName, routeConfigFn)
-	* addPermission(permissionName, permissionConfigFn)
-		* routeConfigFn
-			* permissions(array)
-			* requiredParams(array)
-			* path(string)
-			* prefetch(function returning promise)
-		* permissionConfigFn -> returns promise
-* kloyRouter
-	* toRoute(name, params)
-	* toPath(path)
-	* EVENTS
-		* kloyRouteChangeStart (e, routeName, kloyRoute)
-		* kloyRouteChangeSuccess (e, routeName, kloyRoute)
-		* kloyRouteChangeError (e, err, routeName, kloyRoute)
-* kloyRoute
-	* name()
-	* data()
-	* params()
-	* is()
-	* not()
-	* includes()
-	* excludes()
-	* startsWith()
-	* endsWith()
-	* &history() contains all previous routes
-	* &previous() contains last route
-* kloyLayoutManager
-	* addSection(sectionName, sectionConfigFn)
-		* sectionConfigFn
-			* template(string)
-& previous to property/method indicates tentative support
+
+**kloyRouterProvider**
+- addRoute(*string route's name*, *function route's configuration*)
+- modifyRoute(*stirng route's name*, *function route's configuration*)
+- addPermission(*string permission's name*, *function permission's configuration*)
+
+**kloyRouter**
+- toRoute(*string name*, *object params*)
+- toPath(*string path*)
+- getPathFor(*string route's name*, *object params*)
+- play()
+- pause()
+
+**kloyRoute**
+- name()
+- data()
+- params()
+- is()
+- not()
+- includes()
+- excludes()
+- startsWith()
+- endsWith()
+- *history() contains all previous routes
+- *previous() contains last route
+
+**kloyLayoutManager**
+- addSection(*string section's name*, *function section's config*)
+
+**Route Configuration Function**
+- permissions(*array*)
+- requiredParams(*array*)
+- path(*string*)
+- prefetch(*function, must return promise*)
+
+**Section Configuration Function**
+- template(*string, path to template*)
+
+**EVENTS**
+- kloyRouteChangeStart(*object event*, *string route's name*, *object kloyRoute*)
+- kloyRouteChangeSuccess(*object event*, *string route's name*, *object kloyRoute*)
+- kloyRouteChangeError(*object event*, *object error*, *string route's name*, *object kloyRoute*)
+- kloyRouteChangeRequest(*object event*, *string route name*, *string params*)
+
+**Methods with a * beside them are not yet developed**
