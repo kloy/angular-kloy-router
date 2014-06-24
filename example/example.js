@@ -62,8 +62,8 @@ angular.module('example', ['kloy.router']).
   ) {
 
     $log.debug('Example running');
-    // This should not be needed. Need to re-think how to ensure route syncs.
-    kloyRouter.toPath($location.path());
+    // Uncomment to see how pausing routing works
+    // kloyRouter.pause();
 
     $rootScope.$on('$locationChangeStart', function () {
 

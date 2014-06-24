@@ -170,6 +170,10 @@ describe('A Router', function () {
           });
       });
 
+      // $locationChangeSuccess will be heard, so make sure it changes route
+      // before we do.
+      $apply();
+
       var $i = injector(),
           router = $i.get('kloyRouter'),
           scope = $i.get('$rootScope'),
@@ -213,6 +217,10 @@ describe('A Router', function () {
         this.requiredParams(['id', 'name', 'age']);
       });
     });
+
+    // $locationChangeSuccess will be heard, so make sure it changes route
+    // before we do.
+    $apply();
 
     var $i = injector(),
         router = $i.get('kloyRouter'),
@@ -269,6 +277,10 @@ describe('A Router', function () {
           });
         });
       });
+
+      // $locationChangeSuccess will be heard, so make sure it changes route
+      // before we do.
+      $apply();
 
       var $i = injector(),
           router = $i.get('kloyRouter'),

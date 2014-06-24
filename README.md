@@ -88,7 +88,6 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should throw exception when getting path for unknown route</s>
 * <s>should allow getting path when given a route name and params</s>
 * <s>should throw exception when path is found and all required params are not included</s>
-* should change on first $locationChangeSuccess
 
 ### A Route
 * <s>should contain current route's name</s>
@@ -119,47 +118,83 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 
 # API for module
 
-**kloyRouterProvider**
-- addRoute(*string route's name*, *function route's configuration*)
-- modifyRoute(*stirng route's name*, *function route's configuration*)
-- addPermission(*string permission's name*, *function permission's configuration*)
+### kloyRouterProvider
 
-**kloyRouter**
-- toRoute(*string name*, *object params*)
-- toPath(*string path*)
-- getPathFor(*string route's name*, *object params*)
-- play()
-- pause()
+`kloyRouterProvider.addRoute(routeName, routeConfig)`
 
-**kloyRoute**
-- name()
-- data()
-- params()
-- is()
-- not()
-- includes()
-- excludes()
-- startsWith()
-- endsWith()
-- *history() contains all previous routes
-- *previous() contains last route
+Defines a route and provides configuration
 
-**kloyLayoutManager**
-- addSection(*string section's name*, *function section's config*)
+**Parameters:**
+| Param | Type(s) | Description |
+| routeName | string | Name for route |
+| routeConfig | function | Configures route |
 
-**Route Configuration Function**
-- permissions(*array*)
-- requiredParams(*array*)
-- path(*string*)
-- prefetch(*function, must return promise*)
+**Returns:** kloyRouterProvider
 
-**Section Configuration Function**
-- template(*string, path to template*)
+`kloyRouterProvider.modifyRoute(routeName, routeConfig)`
 
-**EVENTS**
-- kloyRouteChangeStart(*object event*, *string route's name*, *object kloyRoute*)
-- kloyRouteChangeSuccess(*object event*, *string route's name*, *object kloyRoute*)
-- kloyRouteChangeError(*object event*, *object error*, *string route's name*, *object kloyRoute*)
-- kloyRouteChangeRequest(*object event*, *string route name*, *string params*)
+Modifes a defined route and provides additional configuration
 
-**Methods with a * beside them are not yet developed**
+**Parameters:**
+| Param | Type(s) | Description |
+| routeName | string | Name for route |
+| routeConfig | function | Configures route |
+
+**Returns:** kloyRouterProvider
+
+`kloyRouterProvider.addPermission(permissionName, permissionConfig)`
+
+**Parameters:**
+| Param | Type(s) | Description |
+| permissionName | string | Name for permission |
+| permissionConfig | function | Configures permission |
+
+**Returns:** kloyRouterProvider
+
+### kloyRouter
+
+`kloyRouter.toRoute(name, [params])`
+`kloyRouter.toPath(path)`
+`kloyRouter.getPathFor(routeName, [params])`
+`kloyRouter.play()`
+`kloyRouter.pause()`
+
+### kloyRoute
+
+`kloyRoute.name()`
+`kloyRoute.data()`
+`kloyRoute.params()`
+`kloyRoute.is()`
+`kloyRoute.not()`
+`kloyRoute.includes()`
+`kloyRoute.excludes()`
+`kloyRoute.startsWith()`
+`kloyRoute.endsWith()`
+`kloyRoute.history()`
+`kloyRoute.previous()`
+
+### kloyLayoutManagerProvider
+
+`addSection(sectionName, sectionConfig)`
+
+### routeConfig
+
+`routeConfig.permissions(permissions)`
+`routeConfig.requiredParams(permissions)`
+`routeConfig.path(path)`
+`prefetch(fn)`
+
+### sectionConfig
+
+`template(templatePath)`
+
+### EVENTS
+
+`kloyRouteChangeStart(event, routeName, kloyRoute)`
+`kloyRouteChangeSuccess(event, routeName, kloyRoute)`
+`kloyRouteChangeError(event, routeChangeError, routeName, kloyRoute)`
+`kloyRouteChangeRequest(event, routeName, [params])`
+
+# Outstanding questions
+
+- what is expected to happen when a route is asked to changing while still performing a previous route change?

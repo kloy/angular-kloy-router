@@ -129,16 +129,21 @@ ng.module('kloy.router', []).
     $rootScope.$on('$locationChangeSuccess', function (e, newUrl, oldUrl) {
 
       var path = $location.path(),
-          routePath = kloyRoute.path();
+          routePath = kloyRoute.path(),
+          firstChange = true;
 
-      // TODO: test has changed
       // Checks if first change heard
-      // Checks if new URL is not old URL
       // Checks if route's path is not new path
-      if (newUrl !== oldUrl && path !== routePath) {
+      // Checks if new URL is not old URL
+      if (
+        (firstChange === true && path !== routePath) ||
+        (path !== routePath && newUrl !== oldUrl)
+      ) {
         path = $location.path();
         kloyRouter.toPath(path);
       }
+
+      firstChange = false;
     });
   }]);
 
