@@ -116,15 +116,16 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 * <s>should sync when route changes</s>
 
 
-# API for module
+# API
 
-### kloyRouterProvider
+## Provider: kloyRouterProvider
 
-`kloyRouterProvider.addRoute(routeName, routeConfig)`
+#### kloyRouterProvider.addRoute(routeName, routeConfig)
 
 **Description:** Defines a route and provides configuration
 
 **Parameters:**
+
 Param | Type(s) | Description
 --- | --- | ---
 routeName | string | Name for route
@@ -132,11 +133,12 @@ routeConfig | function | Configures route
 
 **Returns:** kloyRouterProvider
 
-`kloyRouterProvider.modifyRoute(routeName, routeConfig)`
+#### kloyRouterProvider.modifyRoute(routeName, routeConfig)
 
-**Description:** Modifes a defined route and provides additional configuration
+**Description:** Modifies a defined route and provides additional configuration
 
 **Parameters:**
+
 Param | Type(s) | Description
 --- | --- | ---
 routeName | string | Name for route
@@ -144,9 +146,12 @@ routeConfig | function | Configures route
 
 **Returns:** kloyRouterProvider
 
-`kloyRouterProvider.addPermission(permissionName, permissionConfig)`
+#### kloyRouterProvider.addPermission(permissionName, permissionConfig)
+
+**Description:** Defines a permission
 
 **Parameters:**
+
 Param | Type(s) | Description
 --- | --- | ---
 permissionName | string | Name for permission
@@ -154,49 +159,125 @@ permissionConfig | function | Configures permission
 
 **Returns:** kloyRouterProvider
 
-### kloyRouter
+===
 
-`kloyRouter.toRoute(name, [params])`
-`kloyRouter.toPath(path)`
-`kloyRouter.getPathFor(routeName, [params])`
-`kloyRouter.play()`
-`kloyRouter.pause()`
+## Service: kloyRouter
 
-### kloyRoute
+#### kloyRouter.toRoute(routeName, [routeParams])
 
-`kloyRoute.name()`
-`kloyRoute.data()`
-`kloyRoute.params()`
-`kloyRoute.is()`
-`kloyRoute.not()`
-`kloyRoute.includes()`
-`kloyRoute.excludes()`
-`kloyRoute.startsWith()`
-`kloyRoute.endsWith()`
-`kloyRoute.history()`
-`kloyRoute.previous()`
+**Description:** Navigate to a route
 
-### kloyLayoutManagerProvider
+**Parameters:**
 
-`addSection(sectionName, sectionConfig)`
+Param | Type(s) | Description
+--- | --- | ---
+routeName | string | Name for route
+routeParams | object | Hash of params for route
 
-### routeConfig
+**Returns:** promise
 
-`routeConfig.permissions(permissions)`
-`routeConfig.requiredParams(permissions)`
-`routeConfig.path(path)`
-`prefetch(fn)`
+#### kloyRouter.toPath(path)
 
-### sectionConfig
+**Description:** Navigate to a route using a path
 
-`template(templatePath)`
+**Parameters:**
 
-### EVENTS
+Param | Type(s) | Description
+--- | --- | ---
+path | string | URL path associated with a route
 
-`kloyRouteChangeStart(event, routeName, kloyRoute)`
-`kloyRouteChangeSuccess(event, routeName, kloyRoute)`
-`kloyRouteChangeError(event, routeChangeError, routeName, kloyRoute)`
-`kloyRouteChangeRequest(event, routeName, [params])`
+**Returns:** promise
+
+#### kloyRouter.getPathFor(routeName, [routeParams])
+
+**Description:** Retrieves path for a route
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+routeName | string | Name for a defined route
+routeParams | string | Params for a defined route
+
+**Returns:** string
+
+#### kloyRouter.play()
+
+**Description:** Allows router to change routes
+
+**Returns:** undefined
+
+#### kloyRouter.pause()
+
+**Description:** Prevents router from making route changes
+
+===
+
+#### kloyRoute.name()
+
+**Description:** Gets the name for the current route
+
+**Returns:** string
+
+#### kloyRoute.data()
+
+**Description:** Gets the data for the current route
+
+**Returns:**
+- object
+- undefined
+
+#### kloyRoute.params()
+
+**Description:** Gets the params for the current route
+
+**Returns:**
+- object
+- undefined
+
+#### kloyRoute.is(value)
+
+**Description:** Checks if current route name is same as value
+
+**Returns:** boolean
+
+#### kloyRoute.not()
+#### kloyRoute.includes()
+#### kloyRoute.excludes()
+#### kloyRoute.startsWith()
+#### kloyRoute.endsWith()
+#### kloyRoute.history()
+#### kloyRoute.previous()
+
+===
+
+## Provider: kloyLayoutManagerProvider
+
+Configuration provider for setting up layout sections
+
+#### kloyLayoutManagerProvider.addSection(sectionName, sectionConfig)
+
+===
+
+## Configuration Function: routeConfig
+
+#### routeConfig.permissions(permissions)
+#### routeConfig.requiredParams(permissions)
+#### routeConfig.path(path)
+#### prefetch(fn)
+
+===
+
+## Configuration Function: sectionConfig
+
+#### sectionConfig.template(templatePath)
+
+## EVENTS
+
+#### kloyRouteChangeStart(event, routeName, kloyRoute)
+#### kloyRouteChangeSuccess(event, routeName, kloyRoute)
+#### kloyRouteChangeError(event, routeChangeError, routeName, kloyRoute)
+#### kloyRouteChangeRequest(event, routeName, [params])
 
 # Outstanding questions
 
