@@ -122,32 +122,35 @@ First, run `npm install && bower install` for dependencies. Next run `grunt` to 
 
 `kloyRouterProvider.addRoute(routeName, routeConfig)`
 
-Defines a route and provides configuration
+**Description:** Defines a route and provides configuration
 
 **Parameters:**
-| Param | Type(s) | Description |
-| routeName | string | Name for route |
-| routeConfig | function | Configures route |
+Param | Type(s) | Description
+--- | --- | ---
+routeName | string | Name for route
+routeConfig | function | Configures route
 
 **Returns:** kloyRouterProvider
 
 `kloyRouterProvider.modifyRoute(routeName, routeConfig)`
 
-Modifes a defined route and provides additional configuration
+**Description:** Modifes a defined route and provides additional configuration
 
 **Parameters:**
-| Param | Type(s) | Description |
-| routeName | string | Name for route |
-| routeConfig | function | Configures route |
+Param | Type(s) | Description
+--- | --- | ---
+routeName | string | Name for route
+routeConfig | function | Configures route
 
 **Returns:** kloyRouterProvider
 
 `kloyRouterProvider.addPermission(permissionName, permissionConfig)`
 
 **Parameters:**
-| Param | Type(s) | Description |
-| permissionName | string | Name for permission |
-| permissionConfig | function | Configures permission |
+Param | Type(s) | Description
+--- | --- | ---
+permissionName | string | Name for permission
+permissionConfig | function | Configures permission
 
 **Returns:** kloyRouterProvider
 
