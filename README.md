@@ -239,15 +239,89 @@ routeParams | string | Params for a defined route
 
 **Description:** Checks if current route name is same as value
 
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+value | string | Value to test against
+
 **Returns:** boolean
 
-#### kloyRoute.not()
-#### kloyRoute.includes()
-#### kloyRoute.excludes()
-#### kloyRoute.startsWith()
-#### kloyRoute.endsWith()
+#### kloyRoute.not(value)
+
+**Description:** Checks if current route name is not same as value
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+value | string | Value to test against
+
+**Returns:** boolean
+
+#### kloyRoute.includes(value)
+
+**Description:** Checks if current route name includes value
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+value | string | Value to test against
+
+**Returns:** boolean
+
+#### kloyRoute.excludes(value)
+
+**Description:** Checks if current route name does not include value
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+value | string | Value to test against
+
+**Returns:** boolean
+
+#### kloyRoute.startsWith(value)
+
+**Description:** Checks if current route name starts with value
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+value | string | Value to test against
+
+**Returns:** boolean
+
+#### kloyRoute.endsWith(value)
+
+**Description:** Checks if current route name starts with value
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+value | string | Value to test against
+
+**Returns:** boolean
+
 #### kloyRoute.history()
+
+**This method is not yet implemented**
+
+**Description:** Contains list of all previous route name and params with back support in order
+
+**Returns:** array
+
 #### kloyRoute.previous()
+
+**This method is not yet implemented**
+
+**Description:** Returns previous route name and params supporting back
+
+**Returns:** object
 
 ===
 
@@ -257,14 +331,74 @@ Configuration provider for setting up layout sections
 
 #### kloyLayoutManagerProvider.addSection(sectionName, sectionConfig)
 
+**Description:** Defines a section in the layout manager
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+sectionName | string | Name for the section
+sectionConfig | function | Configuration for section
+
+**Returns:** kloyLayoutManagerProvider
+
 ===
 
 ## Configuration Function: routeConfig
 
 #### routeConfig.permissions(permissions)
-#### routeConfig.requiredParams(permissions)
+
+**Description:** Checks list of permissions before entering route
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+permissions | array | List of permissions
+
+**Returns:** promise
+
+#### routeConfig.requiredParams(params)
+
+**Description:** Checks list of params against passed route params before entering route
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+params | array | List of required parameters
+
+**Returns:** promise
+
 #### routeConfig.path(path)
-#### prefetch(fn)
+
+**Description:** Defines URL path for route
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+path | string | Path template for route
+
+**Example**
+
+	kloyRouterProvider.addRoute('contact.create', function () {
+		this.path('/contacts/:id');
+	});
+
+**Returns:** undefined
+
+#### routeConfig.prefetch(fn)
+
+**Description:** Prefetch anything and resolve/reject promise when finished
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+fn | function | Dependency injectable function that returns a promise
+
+**Returns:** promise
 
 ===
 
@@ -272,13 +406,33 @@ Configuration provider for setting up layout sections
 
 #### sectionConfig.template(templatePath)
 
+**Description:** Sets template URL for section
+
+**Parameters:**
+
+Param | Type(s) | Description
+--- | --- | ---
+templatePath | string | URL path to angular HTML template
+
+**Returns:** undefined
+
+## Object: routeChangeError
+
+#### routeChangeError.type
+
+**Description:** Type of error related to route change failure.
+
+#### routeChangeError.message
+
+**Description:** Message for error related to route change failure.
+
 ## EVENTS
 
 #### kloyRouteChangeStart(event, routeName, kloyRoute)
 #### kloyRouteChangeSuccess(event, routeName, kloyRoute)
 #### kloyRouteChangeError(event, routeChangeError, routeName, kloyRoute)
-#### kloyRouteChangeRequest(event, routeName, [params])
+#### kloyRouteChangeRequest(event, routeName, [routeParams])
 
 # Outstanding questions
 
-- what is expected to happen when a route is asked to changing while still performing a previous route change?
+- what is expected to happen when a route is asked to change while still performing a previous route change?
