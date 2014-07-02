@@ -27,7 +27,7 @@ var routeDirective = /*@ngInject*/function (
       path = kloyRouter.getPathFor(routeName, routeParams);
 
       if (isAnchor(el)) {
-        attrs.$set('href', '#' + path || '');
+        attrs.$set('href', path ? '#' + path : 'javascript://');
       }
     };
 
