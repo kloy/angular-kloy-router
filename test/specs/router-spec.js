@@ -108,13 +108,13 @@ describe('A Router', function () {
       module(function (kloyRouterProvider) {
 
         kloyRouterProvider.
-          addPermission('password', function ($q) {
+          addPermission('password', ['$q', function ($q) {
 
             permissionChecked1 = 'permission checked';
             var dfd = $q.defer();
             dfd.resolve();
             return dfd.promise;
-          }).
+          }]).
           addPermission('nonsense', function ($q) {
 
             permissionChecked2 = 'permission checked';

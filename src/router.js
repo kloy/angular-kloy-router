@@ -142,9 +142,11 @@ var router = function (
 
       if (ng.isDefined(path)) {
         if (path in pathsConfig) {
-          throw "router.buildPathsConfig(): path already defined for route " +
+          throw new Error(
+            "router.buildPathsConfig(): path already defined for route " +
             pathsConfig[path] + " cannot define duplicate for route " +
-            routeName;
+            routeName
+          );
         }
         pathsConfig[path] = routeName;
       }
@@ -169,9 +171,11 @@ var router = function (
 
       permissionFn = permissions[permissionName];
 
-      if (! ng.isFunction(permissionFn)) {
-        throw "router.checkPermissions(): unknown permission " +
-          permissionName;
+      if (ng.isUndefined(permissionFn)) {
+        throw new Error(
+          "router.checkPermissions(): unknown permission " +
+          permissionName
+        );
       }
 
       try {
@@ -228,8 +232,10 @@ var router = function (
       dfd.resolve();
       return dfd.promise;
     }
-    else if (! ng.isFunction(prefetchFn)) {
-      throw "router.prefetch(): argument must be a function or undefined";
+    else if (! ng.isFunction(prefetchFn) && ! ng.isArray(prefetchFn)) {
+      throw new Error(
+        "router.prefetch(): argument must be a function, array or undefined"
+      );
     }
 
     try {
@@ -392,7 +398,7 @@ var router = function (
     routeConfig = routerConfig[routeName];
 
     if (ng.isUndefined(routeConfig)) {
-      throw 'router.toRoute() unknown route ' + routeName;
+      throw new Error('router.toRoute() unknown route ' + routeName);
     }
 
     if (isPaused) {
@@ -517,11 +523,13 @@ var router = function (
     if (ng.isDefined(routeConfig)) {
       path = routeConfig.path || null;
     } else {
-      throw "router.getPathFor(): Unknown route " + routeName;
+      throw new Error("router.getPathFor(): Unknown route " + routeName);
     }
 
     if (! hasAllValues(routeParamKeys, routeConfig.requiredParams)) {
-      throw "router.getPathFor(): Missing required params for " + routeName;
+      throw new Error(
+        "router.getPathFor(): Missing required params for " + routeName
+      );
     }
 
     ng.forEach(routeParams, function (paramVal, paramName) {
@@ -568,7 +576,9 @@ var routerProvider = function () {
   def.addRoute = function (name, configFn) {
 
     if (name in routes) {
-      throw 'routerProvider.addRoute() route already defined ' + name;
+      throw new Error(
+        'routerProvider.addRoute() route already defined ' + name
+      );
     }
 
     routes[name] = [configFn];
@@ -583,7 +593,9 @@ var routerProvider = function () {
   def.modifyRoute = function (name, configFn) {
 
     if (ng.isUndefined(routes[name])) {
-      throw 'routerProvider.modifyRoute() route not defined ' + name;
+      throw new Error(
+        'routerProvider.modifyRoute() route not defined ' + name
+      );
     }
 
     routes[name].push(configFn);
@@ -597,7 +609,9 @@ var routerProvider = function () {
   def.addPermission = function (name, configFn) {
 
     if (name in permissions) {
-      throw "routerProvider.addPermission(): permission already defined";
+      throw new Error(
+        "routerProvider.addPermission(): permission already defined"
+      );
     }
 
     permissions[name] = configFn;
