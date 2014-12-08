@@ -13,7 +13,7 @@ module.exports = function(config) {
     files: [
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
-      'build/angular-kloy-router.min.js',
+      'dist/angular-kloy-router.min.js',
       'test/helpers/*.js',
       'test/specs/*.js'
     ],

@@ -1,9 +1,76 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/* jshint globalstrict:true */
+'use strict';
+
+var ng = (window.angular);
+
+ng.module('kloy.router', []).
+  constant('KLOY_ROUTER_EVENTS', {
+    'ROUTE_CHANGE_START': 'kloyRouteChangeStart',
+    'ROUTE_CHANGE_SUCCESS': 'kloyRouteChangeSuccess',
+    'ROUTE_CHANGE_ERROR': 'kloyRouteChangeError',
+    'ROUTE_CHANGE_REQUEST': 'kloyRouteChangeRequest'
+  }).
+  provider('kloyRouter', require('./router')).
+  provider('kloyLayoutManager', require('./layout-manager')).
+  factory('kloyRoute', require('./route')).
+  directive('srRoute', require('./route-directive')).
+  run(/*@ngInject*/["kloyLayoutManager", "$rootScope", "KLOY_ROUTER_EVENTS", function (
+    kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
+  ) {
+
+    // Expose sections to scope
+    $rootScope.section = function (section) {
+
+      return kloyLayoutManager.sections()[section] || null;
+    };
+
+    // Update layout when route changes
+    $rootScope.$on(KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS, function () {
+
+      kloyLayoutManager.sync();
+    });
+  }]).
+  run(/*@ngInject*/["$rootScope", "KLOY_ROUTER_EVENTS", "kloyRouter", "$location", "kloyRoute", function (
+    $rootScope, KLOY_ROUTER_EVENTS, kloyRouter, $location, kloyRoute
+  ) {
+
+    // Update route when change request event is heard
+    $rootScope.$on(
+      KLOY_ROUTER_EVENTS.ROUTE_CHANGE_REQUEST,
+      function routeListener (e, routeName, params) {
+
+        kloyRouter.toRoute(routeName, params);
+      }
+    );
+
+    $rootScope.$on('$locationChangeSuccess', function (e, newUrl, oldUrl) {
+
+      var path = $location.path(),
+          routePath = kloyRoute.path(),
+          firstChange = true;
+
+      // Checks if first change heard
+      // Checks if route's path is not new path
+      // Checks if new URL is not old URL
+      if (
+        (firstChange === true && path !== routePath) ||
+        (path !== routePath && newUrl !== oldUrl)
+      ) {
+        path = $location.path();
+        kloyRouter.toPath(path);
+      }
+
+      firstChange = false;
+    });
+  }]);
+
+},{"./layout-manager":2,"./route":4,"./route-directive":3,"./router":5}],2:[function(require,module,exports){
 /*
   I provide all functionality for managing a layout and defining sections for
   a layout.
 */
-var ng = require('ng');
+var ng = (window.angular);
 
 function LayoutManager (sectionConfigs, $rootScope, $injector) {
 
@@ -74,80 +141,7 @@ function LayoutManagerProvider () {
 
 module.exports = LayoutManagerProvider;
 
-},{"ng":"QBxXRv"}],"QBxXRv":[function(require,module,exports){
-/* global angular */
-module.exports = angular;
-
-},{}],"ng":[function(require,module,exports){
-module.exports=require('QBxXRv');
-},{}],4:[function(require,module,exports){
-/* jshint globalstrict:true */
-'use strict';
-
-var ng = require('ng');
-
-ng.module('kloy.router', []).
-  constant('KLOY_ROUTER_EVENTS', {
-    'ROUTE_CHANGE_START': 'kloyRouteChangeStart',
-    'ROUTE_CHANGE_SUCCESS': 'kloyRouteChangeSuccess',
-    'ROUTE_CHANGE_ERROR': 'kloyRouteChangeError',
-    'ROUTE_CHANGE_REQUEST': 'kloyRouteChangeRequest'
-  }).
-  provider('kloyRouter', require('./router')).
-  provider('kloyLayoutManager', require('./layout-manager')).
-  factory('kloyRoute', require('./route')).
-  directive('srRoute', require('./route-directive')).
-  run(/*@ngInject*/["kloyLayoutManager", "$rootScope", "KLOY_ROUTER_EVENTS", function (
-    kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
-  ) {
-
-    // Expose sections to scope
-    $rootScope.section = function (section) {
-
-      return kloyLayoutManager.sections()[section] || null;
-    };
-
-    // Update layout when route changes
-    $rootScope.$on(KLOY_ROUTER_EVENTS.ROUTE_CHANGE_SUCCESS, function () {
-
-      kloyLayoutManager.sync();
-    });
-  }]).
-  run(/*@ngInject*/["$rootScope", "KLOY_ROUTER_EVENTS", "kloyRouter", "$location", "kloyRoute", function (
-    $rootScope, KLOY_ROUTER_EVENTS, kloyRouter, $location, kloyRoute
-  ) {
-
-    // Update route when change request event is heard
-    $rootScope.$on(
-      KLOY_ROUTER_EVENTS.ROUTE_CHANGE_REQUEST,
-      function routeListener (e, routeName, params) {
-
-        kloyRouter.toRoute(routeName, params);
-      }
-    );
-
-    $rootScope.$on('$locationChangeSuccess', function (e, newUrl, oldUrl) {
-
-      var path = $location.path(),
-          routePath = kloyRoute.path(),
-          firstChange = true;
-
-      // Checks if first change heard
-      // Checks if route's path is not new path
-      // Checks if new URL is not old URL
-      if (
-        (firstChange === true && path !== routePath) ||
-        (path !== routePath && newUrl !== oldUrl)
-      ) {
-        path = $location.path();
-        kloyRouter.toPath(path);
-      }
-
-      firstChange = false;
-    });
-  }]);
-
-},{"./layout-manager":1,"./route":6,"./route-directive":5,"./router":7,"ng":"QBxXRv"}],5:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var routeDirective = /*@ngInject*/["$log", "kloyRouter", "$compile", "$rootScope", "$parse", function (
   $log, kloyRouter, $compile, $rootScope, $parse
 ) {
@@ -195,11 +189,11 @@ var routeDirective = /*@ngInject*/["$log", "kloyRouter", "$compile", "$rootScope
 
 module.exports = routeDirective;
 
-},{}],6:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /*
   I provide helper methods for accessing the current route's information
 */
-var ng = require('ng');
+var ng = (window.angular);
 
 var route = /*@ngInject*/function () {
 
@@ -304,8 +298,8 @@ var route = /*@ngInject*/function () {
 
 module.exports = route;
 
-},{"ng":"QBxXRv"}],7:[function(require,module,exports){
-var ng = require('ng');
+},{}],5:[function(require,module,exports){
+var ng = (window.angular);
 
 var router = function (
   routes, permissions, $injector, $location, $rootScope, KLOY_ROUTER_EVENTS,
@@ -948,4 +942,4 @@ var routerProvider = function () {
 
 module.exports = routerProvider;
 
-},{"ng":"QBxXRv"}]},{},[4])
+},{}]},{},[1]);

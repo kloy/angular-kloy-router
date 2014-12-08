@@ -1,6 +1,6 @@
 # Getting Started
 
-First, run `npm install && bower install` for dependencies. Next run `grunt` to start the test server for development.
+First, run `npm install && bower install` for dependencies. Next run `gulp` to start the test server for development.
 
 # Examples
 
