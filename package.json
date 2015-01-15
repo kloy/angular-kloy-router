@@ -1,6 +1,6 @@
 {
   "name": "angular-kloy-router",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "State, Location, and Layout management for AngularJS",
   "main": "dist/angular-kloy-router.js",
   "author": "Keith Loy",
