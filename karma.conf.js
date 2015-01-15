@@ -13,13 +13,20 @@ module.exports = function(config) {
     files: [
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
+      'bower_components/oclazyload/dist/ocLazyLoad.js',
       'dist/angular-kloy-router.js',
       'test/helpers/*.js',
-      'test/specs/*.js'
+      'test/specs/*.js',
+      'test/mocks/app-mock.js',
+      {pattern: 'test/mocks/home-mock.js', included: false},
+      {pattern: 'test/mocks/test-mock.js', included: false}
     ],
 
     // list of files / patterns to exclude
-    exclude: [],
+    exclude: [
+      // 'test/mocks/home-mock.js',
+      // 'test/mocks/test-mock.js'
+    ],
 
     // web server port
     port: 8082,

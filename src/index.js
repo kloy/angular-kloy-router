@@ -3,7 +3,7 @@
 
 var ng = require('ng');
 
-ng.module('kloy.router', []).
+ng.module('kloy.router', ['oc.lazyLoad']).
   constant('KLOY_ROUTER_EVENTS', {
     'ROUTE_CHANGE_START': 'kloyRouteChangeStart',
     'ROUTE_CHANGE_SUCCESS': 'kloyRouteChangeSuccess',
