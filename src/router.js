@@ -2,10 +2,10 @@ var ng = require('ng');
 
 var router = function (
   routes, permissions, $injector, $location, $rootScope, KLOY_ROUTER_EVENTS,
-  $log, $q, kloyRoute
+  $log, $q, kloyRoute, $ocLazyLoad
 ) {
 
-  var checkPermissions, checkParams, doPrefetch, buildRouterConfig, updatePath,
+  var preload, checkPermissions, checkParams, doPrefetch, buildRouterConfig, updatePath,
       buildPathsConfig, hasPath, convertToPathTemplate, pathParams, cleanPath,
       hasAllValues,
       def = {},
@@ -78,6 +78,14 @@ var router = function (
       config = routerConfig[routeName] || {};
 
       helpers = {
+        preload: function(preload) {
+
+          if (ng.isDefined(preload)) {
+            config.preload = preload;
+          }
+
+          return config.preload;
+        },
         permissions: function (listOfPermissions) {
 
           if (ng.isDefined(listOfPermissions)) {
@@ -151,6 +159,57 @@ var router = function (
         pathsConfig[path] = routeName;
       }
     });
+  };
+
+  /*
+    I preload modules and return a promise
+   */
+  preload = function (preload) {
+
+    var preloading;
+
+    if (ng.isUndefined(preload)) {
+      var dfd = $q.defer();
+      dfd.resolve();
+      return dfd.promise;
+    }
+    else if (! ng.isString(preload) && ! ng.isArray(preload) &&
+      ! ng.isFunction(preload)) {
+      throw new Error(
+        "router.preload(): argument must be a string, array, or function"
+      );
+    }
+
+    if (ng.isFunction(preload) ||
+      ng.isArray(preload) && ng.isFunction(preload[preload.length - 1])) {
+      try {
+          preloading = $injector.invoke(preload);
+        } catch (err) {
+        $log.error(
+          'router.preload(): problem invoking preload',
+          err
+        );
+        throw err;
+      }
+
+      return preloading;
+    }
+
+    if (ng.isString(preload) || ng.isArray(preload)) {
+      try {
+          preloading = $injector.invoke(function () {
+            return $ocLazyLoad.load(preload);
+          });
+        } catch (err) {
+        $log.error(
+          'router.preload(): problem invoking preload',
+          err
+        );
+        throw err;
+      }
+
+      return preloading;
+    }
   };
 
   /*
@@ -410,7 +469,32 @@ var router = function (
     $rootScope.$broadcast(startEvent, routeName, kloyRoute);
 
     previousErr = false;
-    promise = checkPermissions(routeConfig.permissions).
+
+    promise = preload(routeConfig.preload).
+      then(
+        function() {
+
+          return checkPermissions(routeConfig.permissions);
+        },
+        function (err) {
+
+          if (previousErr) { return $q.reject(err); }
+
+          $log.debug('router.toRoute(): preload error', err, routeName);
+          $rootScope.$broadcast(
+            errorEvent,
+            {
+              message: err,
+              type: 'preload'
+            },
+            routeName,
+            kloyRoute
+          );
+          previousErr = true;
+
+          return $q.reject(err);
+        }
+      ).
       then(
         function () {
 
@@ -620,7 +704,7 @@ var routerProvider = function () {
   };
 
   def.$get = /*@ngInject*/function (
-    $injector, $location, $rootScope, KLOY_ROUTER_EVENTS, $log, $q, kloyRoute
+    $injector, $location, $rootScope, KLOY_ROUTER_EVENTS, $log, $q, kloyRoute, $ocLazyLoad
   ) {
 
     return router(
@@ -632,7 +716,8 @@ var routerProvider = function () {
       KLOY_ROUTER_EVENTS,
       $log,
       $q,
-      kloyRoute
+      kloyRoute,
+      $ocLazyLoad
     );
   };
 

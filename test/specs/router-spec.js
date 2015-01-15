@@ -2,7 +2,7 @@ describe('A Router', function () {
 
   beforeEach(function () {
 
-    module('kloy.router');
+    module('app', 'kloy.router');
   });
 
   it('should navigate to routes and broadcast success event', function () {
@@ -236,6 +236,180 @@ describe('A Router', function () {
     $apply();
 
     expect(result).toBe('missing required param(s)');
+  });
+
+  it('should preload a module before changing states', function (done) {
+
+    module(function (kloyRouterProvider, $ocLazyLoadProvider) {
+
+      $ocLazyLoadProvider.config({
+        modules: [{
+          name: 'home',
+          files: ['../base/test/mocks/home-mock.js']
+        }]
+      });
+
+      kloyRouterProvider.addRoute('home', function() {
+
+        this.preload('home');
+      });
+
+    });
+
+    var router = injector().get('kloyRouter');
+    router.toRoute('home');
+    $apply();
+
+    var $ocLazyLoad = injector().get('$ocLazyLoad');
+
+    waitsFor(function() {
+      return $ocLazyLoad.isLoaded('home') === true;
+    }, 'Module not loaded', 1500);
+
+    runs(function() {
+      expect($ocLazyLoad.isLoaded('home')).toBe(true);
+    });
+  });
+
+  it('should preload modules before changing states', function () {
+
+    module(function (kloyRouterProvider, $ocLazyLoadProvider) {
+
+      $ocLazyLoadProvider.config({
+        modules: [{
+          name: 'home',
+          files: ['../base/test/mocks/home-mock.js']
+        }, {
+          name: 'test',
+          files: ['../base/test/mocks/test-mock.js']
+        }]
+      });
+
+      kloyRouterProvider.addRoute('home', function() {
+
+        this.preload(['home', 'test']);
+      });
+
+    });
+
+    var router = injector().get('kloyRouter');
+    router.toRoute('home');
+    $apply();
+
+    var $ocLazyLoad = injector().get('$ocLazyLoad');
+
+    waitsFor(function() {
+      return $ocLazyLoad.isLoaded('home') === true &&
+        $ocLazyLoad.isLoaded('test') === true;
+    }, 'Modules not loaded', 1500);
+
+    runs(function() {
+      expect($ocLazyLoad.isLoaded('home')).toBe(true);
+      expect($ocLazyLoad.isLoaded('test')).toBe(true);
+    });
+  });
+
+  it('should preload using a function that returns a promise before changing states', function () {
+
+    var result = 'not called';
+
+    module(function (kloyRouterProvider, $ocLazyLoadProvider) {
+
+      kloyRouterProvider.addRoute('home', function() {
+
+        this.preload(function ($q) {
+          result = 'called';
+          var dfd = $q.defer();
+          dfd.resolve();
+          return dfd.promise;
+        });
+      });
+
+    });
+
+    var router = injector().get('kloyRouter');
+    router.toRoute('home');
+    $apply();
+
+    expect(result).toBe('called');
+  });
+
+  it('should preload modules before checking permissions', function () {
+
+    var ordering = [];
+
+    module(function (kloyRouterProvider) {
+
+      kloyRouterProvider.
+        addPermission('password', ['$q', function ($q) {
+
+          ordering.push('permission');
+
+          var dfd = $q.defer();
+          dfd.resolve();
+
+          return dfd.promise;
+        }]).
+
+        addRoute('home', function() {
+
+          this.permissions(['password']);
+          this.preload(function ($q) {
+
+            ordering.push('preload');
+
+            var dfd = $q.defer();
+            dfd.resolve('Preloaded something');
+
+            return dfd.promise;
+          });
+
+        });
+
+    });
+
+    var router = injector().get('kloyRouter');
+    router.toRoute('home');
+    $apply();
+
+    var $ocLazyLoad = injector().get('$ocLazyLoad');
+
+    expect(ordering).toEqual(['preload', 'permission']);
+  });
+
+  it('should prevent route change and broadcast error when preload fails', function () {
+
+    module(function (kloyRouterProvider) {
+
+      kloyRouterProvider.addRoute('home', function () {
+
+        this.preload(function ($q) {
+          var dfd = $q.defer();
+          dfd.reject();
+          return dfd.promise;
+        });
+      });
+    });
+
+    // $locationChangeSuccess will be heard, so make sure it changes route
+    // before we do.
+    $apply();
+
+    var $i = injector(),
+        router = $i.get('kloyRouter'),
+        scope = $i.get('$rootScope'),
+        events = $i.get('KLOY_ROUTER_EVENTS'),
+        route = $i.get('kloyRoute'),
+        result = 'not called';
+
+    scope.$on(events.ROUTE_CHANGE_ERROR, function (e, err) {
+      result = err.type;
+    });
+    router.toRoute('home');
+    $apply();
+
+    expect(result).toBe('preload');
+    expect(route.name()).not.toBeDefined();
   });
 
   it('should prefetch before changing states', function () {

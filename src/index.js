@@ -3,7 +3,7 @@
 
 var ng = require('ng');
 
-ng.module('kloy.router', []).
+ng.module('kloy.router', ['oc.lazyLoad']).
   constant('KLOY_ROUTER_EVENTS', {
     'ROUTE_CHANGE_START': 'kloyRouteChangeStart',
     'ROUTE_CHANGE_SUCCESS': 'kloyRouteChangeSuccess',
@@ -13,7 +13,7 @@ ng.module('kloy.router', []).
   provider('kloyRouter', require('./router')).
   provider('kloyLayoutManager', require('./layout-manager')).
   factory('kloyRoute', require('./route')).
-  directive('srRoute', require('./route-directive')).
+  directive('krRoute', require('./route-directive')).
   run(/*@ngInject*/function (
     kloyLayoutManager, $rootScope, KLOY_ROUTER_EVENTS
   ) {

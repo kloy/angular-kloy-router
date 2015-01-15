@@ -3,6 +3,7 @@
 <head>
 	<title>Kloy Router Example</title>
 	<script type="text/javascript" src="/bower_components/angular/angular.js"></script>
+	<script type="text/javascript" src="/bower_components/oclazyload/dist/ocLazyLoad.js"></script>
 	<script type="text/javascript" src="/dist/angular-kloy-router.js"></script>
 	<script type="text/javascript" src="example.js"></script>
 </head>
@@ -10,15 +11,15 @@
 	<h1>Kloy Router Example</h1>
 	<ul>
 		<li>
-			<a sr-route="'home'">Home</a>
+			<a kr-route="'home'">Home</a>
 		</li>
 		<li>
-			<a sr-route="'profile'">Profile</a>
+			<a kr-route="'profile'">Profile</a>
 		</li>
 		<li>
 			<a
-				sr-route="'contact.view'"
-				sr-params="{id: 'abcd'}"
+				kr-route="'contact.view'"
+				kr-params="{id: 'abcd'}"
 			>View Contact</a>
 		</li>
 	</ul>

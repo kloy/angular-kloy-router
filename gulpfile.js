@@ -88,6 +88,7 @@ gulp.task('example', function () {
   return runSequence(
     'dist',
     'serve',
-    'open'
+    'open',
+    'watch'
   );
 });

@@ -69,6 +69,11 @@ First, run `npm install && bower install` for dependencies. Next run `gulp` to s
 * <s>should prevent route change and broadcast error when permissions fail</s>
 * <s>should navigate to route with params</s>
 * <s>should enforce required params</s>
+* should preload a module before changing states
+* should preload modules before changing states
+* should preload with a lazy loader that returns a promise before changing states
+* should preload modules before checking permissions
+* should prevent route change and broadcast error when preload fails
 * <s>should prefetch before changing states</s>
 * <s>should prevent route change and broadcast error when prefetch fails</s>
 * <s>should broadcast start event when navigating to route</s>

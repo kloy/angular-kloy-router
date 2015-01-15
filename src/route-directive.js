@@ -11,7 +11,7 @@ var routeDirective = /*@ngInject*/function (
     return el[0].tagName.toUpperCase() === 'A';
   };
 
-  $rootScope.srToRoute = function (routeName, routeParams) {
+  $rootScope.krToRoute = function (routeName, routeParams) {
 
     kloyRouter.toRoute(routeName, routeParams);
   };
@@ -22,8 +22,8 @@ var routeDirective = /*@ngInject*/function (
 
     update = function () {
 
-      routeName = $parse(attrs.srRoute)(scope);
-      routeParams = attrs.srParams ? $parse(attrs.srParams)(scope) : undefined;
+      routeName = $parse(attrs.krRoute)(scope);
+      routeParams = attrs.krParams ? $parse(attrs.krParams)(scope) : undefined;
       path = kloyRouter.getPathFor(routeName, routeParams);
 
       if (isAnchor(el)) {
@@ -31,8 +31,8 @@ var routeDirective = /*@ngInject*/function (
       }
     };
 
-    scope.$watch(attrs.srRoute, update);
-    scope.$watch(attrs.srParams, update);
+    scope.$watch(attrs.krRoute, update);
+    scope.$watch(attrs.krParams, update);
 
     el.on('click', function () {
 

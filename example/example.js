@@ -1,4 +1,13 @@
-angular.module('example', ['kloy.router']).
+angular.module('example', ['kloy.router', 'oc.lazyLoad']).
+  config(/*@ngInject*/function ($ocLazyLoadProvider) {
+
+    $ocLazyLoadProvider.config({
+      modules: [{
+        name: 'home',
+        files: ['home.module.js']
+      }]
+    });
+  }).
   config(/*@ngInject*/function (kloyRouterProvider) {
 
     kloyRouterProvider.
@@ -14,6 +23,7 @@ angular.module('example', ['kloy.router']).
 
       addRoute('home', function () {
 
+        this.preload('home');
         this.permissions(['password']);
         this.data({name: 'awesome'});
         this.path('/home');
