@@ -649,6 +649,8 @@ var router = function (
 
     return false;
   };
+  // Expose hasPath publically. Useful for html 5 history routing checks.
+  def.hasPath = hasPath;
 
   /*
     I convert a path to path template
